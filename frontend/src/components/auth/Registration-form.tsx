@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FormField } from "../ui/form-field"
 import { PreferenceButtons } from "../ui/preference-buttons"
-import { authService, type RegisterData } from "../../services/authService"
+
 import { articlePreferences } from "../../data/articlePreferences"
 import { Loader2, UserPlus } from "lucide-react"
 import {
@@ -15,6 +15,8 @@ import {
   validateDateOfBirth,
   validatePasswordConfirmation,
 } from "../../utils/validation"
+import { registerUser, type RegisterData } from "@/services/authService"
+import { useDispatch } from "react-redux"
 
 interface FormErrors {
   [key: string]: string
@@ -39,6 +41,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
+  const dispatch = useDispatch();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -129,7 +132,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
 
     setIsLoading(true)
     try {
-      await authService.register(formData)
+      await registerUser(formData,dispatch)
       setSuccessMessage("Registration successful! Please check your email to verify your account.")
       setFormData({
         firstName: "",
