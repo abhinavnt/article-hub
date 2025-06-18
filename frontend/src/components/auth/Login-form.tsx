@@ -19,8 +19,8 @@ interface LoginFormProps {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
     const [formData, setFormData] = useState<LoginData>({
-        identifier: "",
-        password: "",
+        identifier: "abhinavnt777@gmail.com",
+        password: "Abhinav@123",
     })
 
     const [errors, setErrors] = useState<FormErrors>({})

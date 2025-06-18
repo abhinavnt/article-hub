@@ -12,3 +12,19 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+
+export interface UserUpdateData {
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+  dateOfBirth?: Date
+  articlePreferences?: string[]
+}
+
+export interface PasswordChangeData {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
