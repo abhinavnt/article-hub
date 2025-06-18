@@ -17,6 +17,7 @@ import {
 } from "../../utils/validation"
 import { registerUser, type RegisterData } from "@/services/authService"
 import { useDispatch } from "react-redux"
+import { useNavigate } from "react-router-dom"
 
 interface FormErrors {
   [key: string]: string
@@ -42,6 +43,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
   const [isLoading, setIsLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const dispatch = useDispatch();
+  const navigate=useNavigate()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -134,17 +136,19 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
     try {
       await registerUser(formData,dispatch)
       setSuccessMessage("Registration successful! Please check your email to verify your account.")
-      setFormData({
-        firstName: "",
-        lastName: "",
-        phone: "",
-        email: "",
-        dateOfBirth: "",
-        password: "",
-        passwordConfirmation: "",
-        articlePreferences: [],
-      })
+      // setFormData({
+      //   firstName: "",
+      //   lastName: "",
+      //   phone: "",
+      //   email: "",
+      //   dateOfBirth: "",
+      //   password: "",
+      //   passwordConfirmation: "",
+      //   articlePreferences: [],
+      // })
       setErrors({})
+      // navigate("/home")
+
     } catch (error: any) {
       setErrors({ submit: error.response?.data?.message || "Registration failed. Please try again." })
     } finally {

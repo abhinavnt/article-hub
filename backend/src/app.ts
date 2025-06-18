@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db";
 import morgan from "morgan";
+import authRoutes from "./routes/auth.routes"
 
 dotenv.config();
 connectDB();
@@ -28,6 +29,7 @@ app.use(
 );
 
 
+app.use('/api/auth',authRoutes)
 
 
 

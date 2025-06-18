@@ -21,7 +21,11 @@ export interface LoginData {
 
 export const registerUser = async (data: RegisterData, dispatch: AppDispatch) => {
   try {
+    console.log("going the response");
+    
     const response = await axiosInstance.post("/auth/register", { data }, { withCredentials: true });
+    console.log(response,"response from the register api");
+    
     dispatch(setCredentials({ accessToken: response.data.accessToken, user: response.data.user }));
     localStorage.setItem("isAuthenticated", "true");
     return response;
