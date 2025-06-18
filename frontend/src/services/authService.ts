@@ -1,38 +1,65 @@
-// import axiosInstance from "@/utils/axiosInstance"
-
-
+import { clearUser, setCredentials } from "@/redux/features/AuthSlice";
+import type { AppDispatch } from "@/redux/store";
+import axiosInstance from "@/utils/axiosInstance";
 
 export interface RegisterData {
-  firstName: string
-  lastName: string
-  phone: string
-  email: string
-  dateOfBirth: string
-  password: string
-  passwordConfirmation: string
-  articlePreferences: string[]
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  dateOfBirth: string;
+  password: string;
+  passwordConfirmation: string;
+  articlePreferences: string[];
 }
 
 export interface LoginData {
-  identifier: string // email or phone
-  password: string
+  identifier: string; // email or phone
+  password: string;
 }
 
-export const authService = {
-  register: async (data: RegisterData) => {
-    // const response = await axiosInstance.post("/auth/register", data)
-    // return response.data
-  },
 
-  login: async (data: LoginData) => {
-    // const response = await axiosInstance.post("/auth/login", data)
-    // if (response.data.token) {
-    //   localStorage.setItem("authToken", response.data.token)
-    // }
-    // return response.data
-  },
+export const registerUser = async (data: RegisterData, dispatch: AppDispatch) => {
+  try {
+    const response = await axiosInstance.post("/auth/register", { data }, { withCredentials: true });
+    dispatch(setCredentials({ accessToken: response.data.accessToken, user: response.data.user }));
+    localStorage.setItem("isAuthenticated", "true");
+    return response;
+  } catch (error: any) {
+    return error.response;
+  }
+};
 
-  logout: () => {
-    localStorage.removeItem("authToken")
-  },
-}
+export const login = async (data: LoginData, dispatch: AppDispatch) => {
+  try {
+    const response = await axiosInstance.post("/auth/login", { data }, { withCredentials: true });
+
+    dispatch(
+      setCredentials({
+        accessToken: response.data.accessToken,
+        user: response.data.user,
+      })
+    );
+
+    localStorage.clear();
+    localStorage.setItem("isAuthenticated", "true");
+    return response;
+  } catch (error: any) {
+    return error.response;
+  }
+};
+
+export const userLogout = async (dispatch: AppDispatch) => {
+  try {
+    const response = await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
+
+    if (response.status === 200) {
+      dispatch(clearUser());
+    }
+
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error("error while logging out");
+  }
+};
