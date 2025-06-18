@@ -41,7 +41,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
 
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
   const dispatch = useDispatch();
   const navigate=useNavigate()
 
@@ -134,20 +134,26 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
 
     setIsLoading(true)
     try {
-      await registerUser(formData,dispatch)
-      setSuccessMessage("Registration successful! Please check your email to verify your account.")
-      // setFormData({
-      //   firstName: "",
-      //   lastName: "",
-      //   phone: "",
-      //   email: "",
-      //   dateOfBirth: "",
-      //   password: "",
-      //   passwordConfirmation: "",
-      //   articlePreferences: [],
-      // })
+     const response=await registerUser(formData,dispatch)
+     if(response.status==400){
+
+       setErrorMessage(response.data.message)
+       return
+     }
+      console.log(response);
+      
+      setFormData({
+        firstName: "",
+        lastName: "",
+        phone: "",
+        email: "",
+        dateOfBirth: "",
+        password: "",
+        passwordConfirmation: "",
+        articlePreferences: [],
+      })
       setErrors({})
-      // navigate("/home")
+      navigate("/feed")
 
     } catch (error: any) {
       setErrors({ submit: error.response?.data?.message || "Registration failed. Please try again." })
@@ -169,9 +175,9 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
           </CardDescription>
         </CardHeader>
         <CardContent className="px-4 sm:px-8 md:px-12 pb-8 sm:pb-12">
-          {successMessage && (
-            <div className="mb-8 p-6 bg-green-50 border-2 border-green-200 rounded-2xl">
-              <p className="text-green-800 font-medium text-center">{successMessage}</p>
+          {errorMessage && (
+            <div className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-2xl">
+              <p className="text-red-800 font-medium text-center">{errorMessage}</p>
             </div>
           )}
 

@@ -54,7 +54,7 @@ export class AuthService implements IAuthService {
     const user = (await this.userRepository.findByEmail(data.identifier)) || (await this.userRepository.findByPhone(data.identifier));
 
     if (!user) {
-      throw new Error("Invalid credentials");
+      throw new Error("Invalid email or phone");
     }
 
     const isPasswordValid = await comparePassword(data.password, user.password);

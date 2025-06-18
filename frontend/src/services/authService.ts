@@ -67,3 +67,28 @@ export const userLogout = async (dispatch: AppDispatch) => {
     throw new Error("error while logging out");
   }
 };
+
+export const refreshToken = async (dispatch: AppDispatch) => {
+  try {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    const isAdmin = localStorage.getItem("adminLoggedIn");
+
+    let data = { role: "user" };
+
+    if (isAuthenticated === "true") {
+      if (isAdmin === "true") {
+        data = { role: "admin" };
+      }
+
+      const response = await axiosInstance.post(`/auth/refresh-token`, data, { withCredentials: true });
+
+      dispatch(setCredentials({ accessToken: response.data.accessToken, user: response.data.user }));
+      return response.data.accessToken;
+    }
+    throw new Error("Session expired. Please log in again");
+  } catch (error) {
+    console.log(error);
+    //   dispatch(logout());
+    throw new Error("Session expired. Please log in again.");
+  }
+};

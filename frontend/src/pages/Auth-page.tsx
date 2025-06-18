@@ -1,10 +1,20 @@
 import { LoginForm } from "@/components/auth/Login-form"
 import { RegistrationForm } from "@/components/auth/Registration-form"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom";
 
 
 export default function AuthPage() {
   const [currentView, setCurrentView] = useState<"login" | "register">("register")
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    if (isAuthenticated === "true") {
+      navigate("/feed");
+    }
+  }, [navigate]);
 
   const switchView = () => {
     setCurrentView(currentView === "login" ? "register" : "login")
