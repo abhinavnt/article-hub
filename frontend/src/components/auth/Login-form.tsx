@@ -7,6 +7,7 @@ import { Loader2, LogIn } from "lucide-react"
 import { validateEmail, validateIndianPhone } from "../../utils/validation"
 import { login, type LoginData } from "@/services/authService"
 import { useDispatch } from "react-redux"
+import { useNavigate } from "react-router-dom"
 
 interface FormErrors {
     [key: string]: string
@@ -25,7 +26,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
     const [errors, setErrors] = useState<FormErrors>({})
     const [isLoading, setIsLoading] = useState(false)
     const [rememberMe, setRememberMe] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
     const dispatch = useDispatch();
+    const navigate = useNavigate()
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -98,8 +101,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
         setIsLoading(true)
         try {
             const response = await login(formData, dispatch)
-            console.log("Login successful:", response)
-            // Handle successful login (redirect, update state, etc.)
+            console.log("Login successful:", response.data.message)
+            if (response.status == 401) {
+
+                setErrorMessage(response.data.message)
+                return
+            }
+            navigate('/feed')
         } catch (error: any) {
             setErrors({
                 submit: error.response?.data?.message || "Login failed. Please check your credentials.",
@@ -118,8 +126,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                     </div>
                     <CardTitle className="text-4xl font-bold text-gray-900 mb-2">Welcome Back</CardTitle>
                     <CardDescription className="text-lg text-gray-600">Sign in to continue your journey</CardDescription>
+
                 </CardHeader>
                 <CardContent className="px-8 pb-12">
+                    {errorMessage && (
+                        <div className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-2xl">
+                            <p className="text-red-800 font-medium text-center">{errorMessage}</p>
+                        </div>
+                    )}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <FormField
                             label="Email or Phone Number"
