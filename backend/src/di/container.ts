@@ -10,6 +10,14 @@ import { IUserService } from "../core/interfaces/services/IUserService";
 import { UserService } from "../services/user.service";
 import { IUserController } from "../core/interfaces/controllers/IUserController";
 import { UserController } from "../controllers/user.controller";
+import { IArticleRepository } from "../core/interfaces/repositories/IArticleRepository";
+import { ArticleRepository } from "../repositories/article.repository";
+import { ICategoryRepository } from "../core/interfaces/repositories/ICategoryRepository";
+import { CategoryRepository } from "../repositories/category.repository";
+import { IArticleService } from "../core/interfaces/services/IArticleService";
+import { ArticleService } from "../services/article.service";
+import { IArticleController } from "../core/interfaces/controllers/IArticleController";
+import { ArticleController } from "../controllers/article.controller";
 
 
 
@@ -25,6 +33,11 @@ container.bind<IAuthService>(TYPES.AuthService).to(AuthService)
 container.bind<IAuthController>(TYPES.AuthController).to(AuthController)
 container.bind<IUserService>(TYPES.UserService).to(UserService)
 container.bind<IUserController>(TYPES.UserController).to(UserController)
+
+container.bind<IArticleRepository>(TYPES.ArticleRepository).to(ArticleRepository)
+container.bind<ICategoryRepository>(TYPES.CategoryRepository).to(CategoryRepository)
+container.bind<IArticleService>(TYPES.ArticleService).to(ArticleService)
+container.bind<IArticleController>(TYPES.ArticleController).to(ArticleController)
 
 
 export default container
