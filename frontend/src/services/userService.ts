@@ -71,4 +71,6 @@ export const userService = {
       }, 300)
     })
   },
+
+   uploadProfileImage: async (userId: string, file: File) => URL.createObjectURL(file),
 }

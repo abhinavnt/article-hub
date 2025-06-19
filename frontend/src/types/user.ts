@@ -21,6 +21,7 @@ export interface UserUpdateData {
   phone?: string
   dateOfBirth?: Date
   articlePreferences?: string[]
+  profileImage?:string
 }
 
 export interface PasswordChangeData {
