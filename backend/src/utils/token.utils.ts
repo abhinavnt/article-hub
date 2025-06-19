@@ -5,5 +5,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
  */
 export function generateToken(payload: string | object | Buffer, secret: string, expiresIn: string): string {
   const options: SignOptions = { expiresIn: expiresIn as SignOptions["expiresIn"] };
+  console.log(payload,"token payeload");
+  
   return jwt.sign(payload, secret, options);
 }

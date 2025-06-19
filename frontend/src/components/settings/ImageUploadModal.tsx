@@ -74,7 +74,11 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onCl
   }
 
   const handleUpload = () => {
+    console.log("modal handle upload");
+
     if (fileInputRef.current?.files?.[0]) {
+      console.log("fileInputRe");
+
       onImageUpload(fileInputRef.current.files[0])
       onClose()
     }
@@ -105,13 +109,12 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onCl
 
           {/* Upload Area */}
           <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragActive
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
                 ? "border-blue-500 bg-blue-50"
                 : error
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-            }`}
+              }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}

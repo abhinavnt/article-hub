@@ -12,6 +12,7 @@ export class UserResponseDto {
   status: "active" | "blocked";
   createdAt: Date;
   updatedAt: Date;
+  profileImageUrl?:string
 
   constructor(user: IUser) {
     this.userId = user.userId;
@@ -22,6 +23,7 @@ export class UserResponseDto {
     this.dateOfBirth = user.dateOfBirth;
     this.articlePreferences = user.articlePreferences;
     this.role = user.role;
+    this.profileImageUrl=user.profileImageUrl;
     this.status = user.status;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;

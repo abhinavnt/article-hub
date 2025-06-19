@@ -1,11 +1,9 @@
-
 import { validateDateOfBirth, validateEmail, validateIndianPhone, validateName } from "@/utils/validation"
 import type React from "react"
 import { useState, useEffect, useMemo } from "react"
 import { Card } from "../ui/CustomCard"
 import { Input } from "../ui/CustomInput"
 import { Button } from "../ui/CustomButton"
-
 
 interface ProfileData {
   firstName: string
@@ -26,12 +24,24 @@ export const ProfileInformationSection: React.FC<ProfileInformationSectionProps>
   onSubmit,
   loading,
 }) => {
-  const [formData, setFormData] = useState<ProfileData>(initialData)
+  const formatDateForInput = (date: string) => {
+    if (!date) return ""
+    return date.split("T")[0] // Extracts YYYY-MM-DD from ISO string
+  }
+
+  const [formData, setFormData] = useState<ProfileData>({
+    ...initialData,
+    dateOfBirth: formatDateForInput(initialData.dateOfBirth),
+  })
   const [errors, setErrors] = useState<Partial<ProfileData>>({})
   const [touched, setTouched] = useState<Partial<Record<keyof ProfileData, boolean>>>({})
 
   useEffect(() => {
-    setFormData(initialData)
+    setFormData((prev) => ({
+      ...prev,
+      ...initialData,
+      dateOfBirth: formatDateForInput(initialData.dateOfBirth),
+    }))
   }, [initialData])
 
   // Check if form has changes
@@ -41,7 +51,7 @@ export const ProfileInformationSection: React.FC<ProfileInformationSectionProps>
       formData.lastName !== initialData.lastName ||
       formData.email !== initialData.email ||
       formData.phone !== initialData.phone ||
-      formData.dateOfBirth !== initialData.dateOfBirth
+      formData.dateOfBirth !== formatDateForInput(initialData.dateOfBirth)
     )
   }, [formData, initialData])
 
@@ -139,6 +149,7 @@ export const ProfileInformationSection: React.FC<ProfileInformationSectionProps>
           onBlur={() => handleBlur("email")}
           error={touched.email ? errors.email : ""}
           required
+          readOnly
         />
 
         <Input

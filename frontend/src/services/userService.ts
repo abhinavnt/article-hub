@@ -1,76 +1,79 @@
-import type { User, UserUpdateData, PasswordChangeData } from "@/types/user"
+import { updateUser } from "@/redux/features/AuthSlice";
+import { store } from "@/redux/store";
+import type { UserUpdateData } from "@/types/user";
+import axiosInstance from "@/utils/axiosInstance";
 
-export const userService = {
-  // Update user profile
-  updateProfile: async (userId: string, userData: UserUpdateData): Promise<User> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Simulate API call
-        if (Math.random() > 0.1) {
-          // 90% success rate
-          resolve({
-            userId,
-            firstName: userData.firstName || "John",
-            lastName: userData.lastName || "Doe",
-            email: userData.email || "john@example.com",
-            phone: userData.phone || "+1234567890",
-            dateOfBirth: userData.dateOfBirth || new Date("1990-01-01"),
-            articlePreferences: userData.articlePreferences || ["Technology"],
-            profileImageUrl: "/placeholder.svg?height=100&width=100",
-            role: "user",
-            status: "active",
-            createdAt: new Date("2024-01-01"),
-            updatedAt: new Date(),
-          } as User)
-        } else {
-          reject(new Error("Failed to update profile"))
-        }
-      }, 1000)
-    })
-  },
+export const updateProfile = async (userId: string, data: Partial<UserUpdateData>) => {
+  try {
+    const response = await axiosInstance.patch(`/user/profile/${userId}`, data);
 
-  // Change password
-  changePassword: async (userId: string, passwordData: PasswordChangeData): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-          reject(new Error("Passwords do not match"))
-          return
-        }
-        if (passwordData.newPassword.length < 6) {
-          reject(new Error("Password must be at least 6 characters"))
-          return
-        }
-        // Simulate API call
-        if (Math.random() > 0.1) {
-          // 90% success rate
-          resolve()
-        } else {
-          reject(new Error("Failed to change password"))
-        }
-      }, 800)
-    })
-  },
+    const updatedUser = response.data;
 
-  // Get available preferences/categories
-  getAvailablePreferences: async (): Promise<string[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          "Technology",
-          "Health",
-          "Travel",
-          "Food",
-          "Finance",
-          "Sports",
-          "Education",
-          "Entertainment",
-          "Science",
-          "Art",
-        ])
-      }, 300)
-    })
-  },
+    store.dispatch(updateUser({ user: updatedUser }));
 
-   uploadProfileImage: async (userId: string, file: File) => URL.createObjectURL(file),
-}
+    return updatedUser;
+  } catch (error) {
+    console.error("Failed to update profile:", error);
+    throw error;
+  }
+};
+
+export const updatePreferences = async (userId: string, preferences: string[]) => {
+  try {
+    const response = await axiosInstance.patch(`/user/preferences/${userId}`, {
+      articlePreferences: preferences,
+    });
+
+    const updatedUser = response.data;
+
+    store.dispatch(updateUser({ user: updatedUser }));
+
+    return updatedUser;
+  } catch (error) {
+    console.error("Failed to update profile:", error);
+    throw error;
+  }
+};
+
+export const uploadProfileImage = async (userId: string, file: File) => {
+  try {
+    const formData = new FormData();
+
+    formData.append("photo", file);
+
+    const response = await axiosInstance.post(`/user/profile-photo/${userId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    console.log(response.data.user, "after profile updated");
+
+    const updatedUser = response.data.user;
+
+    store.dispatch(updateUser({ user: updatedUser }));
+
+    // return updateUser.profileImageUrl
+  } catch (error) {
+    console.error("Failed to upload profile photo:", error);
+    throw error;
+  }
+};
+
+export const changePassword = async (userId: string, data: { currentPassword: string; newPassword: string; confirmPassword: string }) => {
+  try {
+    await axiosInstance.post(`/user/change-password/${userId}`, data);
+  } catch (error) {
+    console.error("Failed to change password:", error);
+    throw error;
+  }
+};
+
+export const getAvailablePreferences = () => {
+  try {
+    return ["Technology", "Sports", "News", "Entertainment"];
+  } catch (error) {
+    console.error("Failed to fetch available preferences:", error);
+    throw error;
+  }
+};
