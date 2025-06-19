@@ -1,4 +1,3 @@
-
 import { TYPES } from "../di/types";
 
 import { v4 as uuidv4 } from "uuid";
@@ -11,14 +10,15 @@ import { UserResponseDto } from "../dto/auth/response/user-response.dto";
 import { LoginDto } from "../dto/auth/request/login.dto";
 import { generateToken } from "../utils/token.utils";
 import { comparePassword, hashPassword } from "../utils/bycrpt.util";
+import { UserRole } from "../core/constants/user.enum";
 
 @injectable()
 export class AuthService implements IAuthService {
   constructor(@inject(TYPES.UserRepository) private userRepository: IUserRepository) {}
 
- async register(data: RegisterDto): Promise<{ user: UserResponseDto; accessToken: string; refreshToken: string; }> {
-      console.log("reached the service layer",data);
-    
+  async register(data: RegisterDto): Promise<{ user: UserResponseDto; accessToken: string; refreshToken: string }> {
+    console.log("reached the service layer", data);
+
     const existingEmail = await this.userRepository.findByEmail(data.email);
     if (existingEmail) {
       throw new Error("Email already exists");
@@ -43,12 +43,12 @@ export class AuthService implements IAuthService {
       articlePreferences: data.articlePreferences,
     });
 
-    const accessToken = generateToken({ userId: newUser.userId }, process.env.JWT_SECRET || "secret", "15m");
+    const accessToken = generateToken({ userId: newUser.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "15m");
 
-    const refreshToken = generateToken({ userId: newUser.userId }, process.env.JWT_REFRESH_SECRET || "refresh_secret", "7d");
+    const refreshToken = generateToken({ userId: newUser.userId, role: UserRole.USER }, process.env.JWT_REFRESH_SECRET || "refresh_secret", "7d");
 
     return { user: new UserResponseDto(newUser), accessToken, refreshToken };
- }
+  }
 
   async login(data: LoginDto): Promise<{ user: UserResponseDto; accessToken: string; refreshToken: string }> {
     const user = (await this.userRepository.findByEmail(data.identifier)) || (await this.userRepository.findByPhone(data.identifier));
@@ -62,8 +62,8 @@ export class AuthService implements IAuthService {
       throw new Error("Invalid password");
     }
 
-    const accessToken = generateToken({ userId: user.userId }, process.env.JWT_SECRET || "secret", "15m");
-    const refreshToken = generateToken({ userId: user.userId }, process.env.JWT_REFRESH_SECRET || "refresh_secret", "7d");
+    const accessToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "15m");
+    const refreshToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_REFRESH_SECRET || "refresh_secret", "7d");
 
     return { user: new UserResponseDto(user), accessToken, refreshToken };
   }
@@ -85,7 +85,7 @@ export class AuthService implements IAuthService {
       throw new Error("Invalid refresh token");
     }
 
-    const newAccessToken = generateToken({ userId: user.userId }, process.env.JWT_SECRET || "secret", "15m");
+    const newAccessToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "15m");
 
     return { accessToken: newAccessToken, user: new UserResponseDto(user) };
   }
