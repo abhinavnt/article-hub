@@ -1,29 +1,35 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import type { ArticleFormData } from "@/types/article"
-import { articleService } from "@/services/articleService"
-import { useAppSelector } from "@/redux/store"
+import type { ArticleFormData, Category, ValidationErrors } from "../types/article"
+import { Plus, Save, Send } from "lucide-react"
 import { Card } from "@/components/ui/CustomCard"
 import { Input } from "@/components/ui/CustomInput"
+import { ImageUpload } from "@/components/create-articles/ImageUpload"
 import { Button } from "@/components/ui/CustomButton"
+import { TagInput } from "@/components/create-articles/TagInput"
+import { CreateCategoryModal } from "@/components/create-articles/CreateCategoryModal"
+import { createCategory, getCategories, publishArticle, saveDraft } from "@/services/AddArticleService"
 
 export const CreateArticle: React.FC = () => {
-  const { user } = useAppSelector((state) => state.auth)
-  const navigate = useNavigate()
+
+
   const [formData, setFormData] = useState<ArticleFormData>({
     title: "",
     description: "",
     content: "",
-    imageUrl: "",
+    image: null,
     tags: [],
     category: "",
+    newCategory: "",
   })
-  const [categories, setCategories] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState("")
+
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState<Partial<ArticleFormData>>({})
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [errors, setErrors] = useState<ValidationErrors>({})
+  const [loadingCategories, setLoadingCategories] = useState(true)
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
 
   useEffect(() => {
     loadCategories()
@@ -31,208 +37,307 @@ export const CreateArticle: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      const availableCategories = await articleService.getCategories()
+      setLoadingCategories(true)
+      const availableCategories = await getCategories()
       setCategories(availableCategories)
     } catch (error) {
       console.error("Failed to load categories:", error)
+    } finally {
+      setLoadingCategories(false)
     }
   }
 
-  const handleInputChange = (field: keyof ArticleFormData, value: string) => {
+  const validateField = (field: keyof ArticleFormData, value: any): string | undefined => {
+    switch (field) {
+      case "title":
+        if (!value || !value.trim()) return "Title is required"
+        if (value.trim().length < 5) return "Title must be at least 5 characters"
+        if (value.trim().length > 100) return "Title must be less than 100 characters"
+        break
+      case "description":
+        if (!value || !value.trim()) return "Description is required"
+        if (value.trim().length < 10) return "Description must be at least 10 characters"
+        if (value.trim().length > 300) return "Description cannot exceed 300 characters"
+        break
+      case "content":
+        if (!value || !value.trim()) return "Content is required"
+        if (value.trim().length < 50) return "Content must be at least 50 characters"
+        if (value.trim().length > 5000) return "Content cannot exceed 5000 characters"
+        break
+      case "category":
+        if (!value) return "Please select a category"
+        break
+      case "tags":
+        if (!Array.isArray(value) || value.length === 0) return "At least one tag is required"
+        break
+    }
+    return undefined
+  }
+
+  const handleInputChange = (field: keyof ArticleFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
+
+    // Real-time validation
+    const error = validateField(field, value)
+    setErrors((prev) => ({ ...prev, [field]: error }))
   }
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }))
-      setTagInput("")
+  const handleCreateCategory = async (categoryName: string) => {
+    try {
+      const newCategory = await createCategory(categoryName)
+      setCategories((prev) => [...prev, newCategory])
+      handleInputChange("category", newCategory.name)
+    } catch (error) {
+      console.error("Failed to create category:", error)
     }
-  }
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }))
   }
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<ArticleFormData> = {}
+    const newErrors: ValidationErrors = {}
 
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required"
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required"
-    }
-    if (!formData.content.trim()) {
-      newErrors.content = "Content is required"
-    }
-    if (!formData.category) {
-      newErrors.category = "Category is required"
-    }
-    if (formData.tags.length === 0) {
-      newErrors.tags = ["At least one tag is required"]
-    }
+    // Validate all fields
+    Object.keys(formData).forEach((key) => {
+      const field = key as keyof ArticleFormData
+      if (field !== "newCategory" && field !== "image") {
+        const error = validateField(field, formData[field])
+        if (error) {
+          newErrors[field] = error
+        }
+      }
+    })
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
+  //api connected
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm() || !user) return
-
-    setLoading(true)
-    try {
-      await articleService.createArticle(formData, user.userId)
-      alert("Article created successfully!")
-      navigate("/my-articles")
-    } catch (error) {
-      console.error("Failed to create article:", error)
-      alert("Failed to create article. Please try again.")
-    } finally {
-      setLoading(false)
+    if (!validateForm()) {
+      const firstErrorElement = document.querySelector(".text-red-600");
+      firstErrorElement?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
     }
-  }
 
+    setLoading(true);
+    try {
+      console.log(formData, "submitting form data");
+      const response = await publishArticle(formData);
+
+      alert(`🎉 Article "${response.title}" published successfully!\nArticle ID: ${response.id}`);
+
+      setFormData({
+        title: "",
+        description: "",
+        content: "",
+        image: null,
+        tags: [],
+        category: "",
+        newCategory: "",
+      });
+
+      await loadCategories();
+    } catch (error) {
+      console.error("Failed to publish article:", error);
+      alert("❌ Failed to publish article. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!formData.title.trim()) {
+      alert("⚠️ Please add a title before saving as draft");
+      return;
+    }
+
+    setSavingDraft(true);
+    try {
+      const response = await saveDraft(formData);
+
+      alert(`📝 Article "${response.title}" saved as draft!\nDraft ID: ${response.id}`);
+
+      await loadCategories();
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+      alert("❌ Failed to save draft. Please try again.");
+    } finally {
+      setSavingDraft(false);
+    }
+  };
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-black">Create New Article</h1>
-        <p className="text-gray-600 mt-2">Share your knowledge with the community</p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">Create New Article</h1>
+          <p className="text-lg text-gray-600">Share your knowledge and inspire others</p>
+        </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Input
-            label="Article Title"
-            value={formData.title}
-            onChange={(e) => handleInputChange("title", e.target.value)}
-            placeholder="Enter a compelling title for your article"
-            error={errors.title}
-            required
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Write a brief description of your article"
-              rows={3}
-              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
-                errors.description ? "border-red-500" : ""
-              }`}
-              required
+        <Card>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Title */}
+            <Input
+              label="Article Title"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              placeholder="Write a compelling title that grabs attention..."
+              error={errors.title}
             />
-            {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => handleInputChange("content", e.target.value)}
-              placeholder="Write your article content here..."
-              rows={10}
-              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
-                errors.content ? "border-red-500" : ""
-              }`}
-              required
-            />
-            {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
-          </div>
-
-          <Input
-            label="Image URL (Optional)"
-            value={formData.imageUrl}
-            onChange={(e) => handleInputChange("imageUrl", e.target.value)}
-            placeholder="https://example.com/image.jpg"
-            type="url"
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select
-              value={formData.category}
-              onChange={(e) => handleInputChange("category", e.target.value)}
-              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
-                errors.category ? "border-red-500" : ""
-              }`}
-              required
-            >
-              <option value="">Select a category</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-            {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-            <div className="flex items-center space-x-2 mb-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                placeholder="Enter a tag"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    handleAddTag()
-                  }
-                }}
+            {/* Description */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-900">
+                  Description <span className="text-red-500">*</span>
+                </label>
+                <span
+                  className={`text-sm ${formData.description.length > 300
+                    ? "text-red-500"
+                    : formData.description.length > 250
+                      ? "text-yellow-600"
+                      : "text-gray-500"
+                    }`}
+                >
+                  {formData.description.length}/300
+                </span>
+              </div>
+              <textarea
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                placeholder="Provide a brief, engaging description of your article..."
+                rows={4}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 resize-none ${errors.description
+                  ? "border-red-500 bg-red-50 focus:border-red-600"
+                  : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
+                  }`}
               />
-              <Button type="button" onClick={handleAddTag} variant="outline">
-                Add Tag
-              </Button>
+              {errors.description && <p className="text-sm text-red-600 font-medium">{errors.description}</p>}
             </div>
 
-            {formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {formData.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
-                  >
-                    #{tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-2 text-gray-500 hover:text-red-600"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
+            {/* Content */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-900">
+                  Article Content <span className="text-red-500">*</span>
+                </label>
+                <span
+                  className={`text-sm ${formData.content.length > 5000
+                    ? "text-red-500"
+                    : formData.content.length > 4500
+                      ? "text-yellow-600"
+                      : "text-gray-500"
+                    }`}
+                >
+                  {formData.content.length}/5000
+                </span>
               </div>
-            )}
+              <textarea
+                value={formData.content}
+                onChange={(e) => handleInputChange("content", e.target.value)}
+                placeholder="Write your article content here. Share your insights, experiences, and knowledge..."
+                rows={16}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 resize-y ${errors.content
+                  ? "border-red-500 bg-red-50 focus:border-red-600"
+                  : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
+                  }`}
+              />
+              {errors.content && <p className="text-sm text-red-600 font-medium">{errors.content}</p>}
+            </div>
 
-            {errors.tags && <p className="mt-1 text-sm text-red-600">At least one tag is required</p>}
-          </div>
+            {/* Image Upload */}
+            <ImageUpload
+              onImageSelect={(file) => handleInputChange("image", file)}
+              error={errors.image}
+              currentImage={formData.image}
+            />
 
-          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-            <Button type="button" variant="outline" onClick={() => navigate("/my-articles")}>
-              Cancel
-            </Button>
-            <Button type="submit" loading={loading}>
-              {loading ? "Creating..." : "Create Article"}
-            </Button>
-          </div>
-        </form>
-      </Card>
+            {/* Category Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-900">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCategoryModal(true)}
+                  className="text-black hover:bg-black hover:text-white"
+                >
+                  <Plus size={16} className="mr-1" />
+                  New Category
+                </Button>
+              </div>
+
+              {loadingCategories ? (
+                <div className="animate-pulse bg-gray-200 h-12 rounded-xl"></div>
+              ) : (
+                <select
+                  value={formData.category}
+                  onChange={(e) => handleInputChange("category", e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 ${errors.category
+                    ? "border-red-500 bg-red-50 focus:border-red-600"
+                    : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
+                    }`}
+                >
+                  <option value="">Select a category for your article</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {errors.category && <p className="text-sm text-red-600 font-medium">{errors.category}</p>}
+            </div>
+
+            {/* Tags */}
+            <TagInput
+              tags={formData.tags}
+              onTagsChange={(tags) => handleInputChange("tags", tags)}
+              error={errors.tags}
+            />
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t-2 border-gray-100 space-y-4 sm:space-y-0 gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={handleSaveDraft}
+                className="w-full sm:w-auto"
+                loading={savingDraft}
+                disabled={savingDraft || loading}
+              >
+                <Save size={18} className="mr-2" />
+                {savingDraft ? "Saving Draft..." : "Save as Draft"}
+              </Button>
+
+              <Button
+                type="submit"
+                size="lg"
+                loading={loading}
+                disabled={loading}
+                className="w-full sm:w-auto min-w-[200px]"
+              >
+                <Send size={18} className="mr-2" />
+                {loading ? "Publishing..." : "Publish Article"}
+              </Button>
+            </div>
+          </form>
+        </Card>
+
+        {/* Create Category Modal */}
+        <CreateCategoryModal
+          isOpen={showCategoryModal}
+          onClose={() => setShowCategoryModal(false)}
+          onCreateCategory={handleCreateCategory}
+          existingCategories={categories.map((cat) => cat.name)}
+        />
+      </div>
     </div>
   )
 }
