@@ -74,7 +74,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelect, error, 
             alt="Preview"
             className="w-full h-64 sm:h-80 object-cover rounded-2xl border-2 border-gray-100"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-2xl flex items-center justify-center">
+          <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-2xl flex items-center justify-center">
             <button
               type="button"
               onClick={removeImage}
