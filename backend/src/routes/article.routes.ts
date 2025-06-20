@@ -14,4 +14,9 @@ router.post("/categories", authMiddleware([UserRole.USER]), articleController.cr
 router.post("/draft", authMiddleware([UserRole.USER]), upload.single("image"), articleController.saveDraft);
 router.post("/publish", authMiddleware([UserRole.USER]), upload.single("image"), articleController.publishArticle);
 
+router.get("/", authMiddleware([UserRole.USER]), articleController.getAllArticles);
+router.get("/preferences", authMiddleware([UserRole.USER]), articleController.getArticlesByPreferences);
+router.put("/:id/like", authMiddleware([UserRole.USER]), articleController.likeArticle);
+router.put("/:id/dislike", authMiddleware([UserRole.USER]), articleController.dislikeArticle);
+
 export default router;

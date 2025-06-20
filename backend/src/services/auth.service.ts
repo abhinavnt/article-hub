@@ -17,7 +17,6 @@ export class AuthService implements IAuthService {
   constructor(@inject(TYPES.UserRepository) private userRepository: IUserRepository) {}
 
   async register(data: RegisterDto): Promise<{ user: UserResponseDto; accessToken: string; refreshToken: string }> {
-    console.log("reached the service layer", data);
 
     const existingEmail = await this.userRepository.findByEmail(data.email);
     if (existingEmail) {
@@ -43,7 +42,7 @@ export class AuthService implements IAuthService {
       articlePreferences: data.articlePreferences,
     });
 
-    const accessToken = generateToken({ userId: newUser.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "15m");
+    const accessToken = generateToken({ userId: newUser.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "60m");
 
     const refreshToken = generateToken({ userId: newUser.userId, role: UserRole.USER }, process.env.JWT_REFRESH_SECRET || "refresh_secret", "7d");
 
@@ -62,7 +61,7 @@ export class AuthService implements IAuthService {
       throw new Error("Invalid password");
     }
 
-    const accessToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "15m");
+    const accessToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "60m");
     const refreshToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_REFRESH_SECRET || "refresh_secret", "7d");
 
     return { user: new UserResponseDto(user), accessToken, refreshToken };
