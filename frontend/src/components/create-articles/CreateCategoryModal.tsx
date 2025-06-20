@@ -67,7 +67,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
           label="Category Name"
           value={categoryName}
           onChange={(e) => {
-            setCategoryName(e.target.value)
+            setCategoryName(e.target.value.toUpperCase()) 
             if (error) setError("")
           }}
           placeholder="e.g., Web Development, Data Science"

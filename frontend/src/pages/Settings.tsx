@@ -4,8 +4,8 @@ import { ProfileInformationSection } from "@/components/settings/ProfileInformat
 import { ProfilePhotoSection } from "@/components/settings/ProfilePhotoSection";
 import { Loading } from "@/components/ui/Loading";
 import { useAppSelector } from "@/redux/store";
-import { changePassword, getAvailablePreferences, updatePreferences, updateProfile, uploadProfileImage } from "@/services/userService";
-
+import { changePassword, updatePreferences, updateProfile, uploadProfileImage } from "@/services/userService";
+import { getCategories } from "@/services/AddArticleService";
 import type { User } from "@/types/user";
 import type React from "react";
 import { useState, useEffect } from "react";
@@ -14,6 +14,11 @@ interface PasswordChangeData {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
 }
 
 export const Settings: React.FC = () => {
@@ -29,7 +34,7 @@ export const Settings: React.FC = () => {
     profileImageUrl: user?.profileImageUrl || "",
   });
 
-  const [availablePreferences, setAvailablePreferences] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [preferencesLoading, setPreferencesLoading] = useState(true);
@@ -39,7 +44,7 @@ export const Settings: React.FC = () => {
   const [initialPreferences, setInitialPreferences] = useState<string[]>([]);
 
   useEffect(() => {
-    loadPreferences();
+    loadCategories();
   }, []);
 
   useEffect(() => {
@@ -58,17 +63,34 @@ export const Settings: React.FC = () => {
     }
   }, [user]);
 
-  const loadPreferences = async () => {
+
+
+
+  const loadCategories = async () => {
     try {
-      const preferences = await getAvailablePreferences();
-      setAvailablePreferences(preferences);
+      const categories = await getCategories();
+      setAvailableCategories(categories);
     } catch (error) {
-      console.error("Failed to load preferences:", error);
-      alert("Failed to load preferences. Please try again.");
+      console.error("Failed to load categories:", error);
+      alert("Failed to load categories. Please try again.");
     } finally {
       setPreferencesLoading(false);
     }
   };
+
+
+   // Map availablePreferences to options format for PreferenceButtons
+     const transformedData = availableCategories.map((cat: Category) => ({
+            ...cat,
+            id: cat.name.toUpperCase(),
+            originalId: cat.id, // Preserve original id as originalId
+          }))
+  
+       const limitedCategories = transformedData.map((cat) => ({
+      id: cat.id, // Use originalId for backend compatibility
+      label: cat.id, // Display the new uppercase id field
+    }))
+  
 
   const handleImageUpdate = async (file: File) => {
     console.log("settings handleImageUpdate");
@@ -77,7 +99,7 @@ export const Settings: React.FC = () => {
 
     setImageUploadLoading(true);
     try {
-      console.log("imgae uploading");
+      console.log("image uploading");
 
       const imageUrl = await uploadProfileImage(user.userId, file);
       setProfileData((prev) => ({ ...prev, profileImage: imageUrl }));
@@ -191,7 +213,7 @@ export const Settings: React.FC = () => {
           />
 
           <ArticlePreferencesSection
-            availablePreferences={availablePreferences}
+            availablePreferences={limitedCategories}
             selectedPreferences={profileData.articlePreferences || []}
             initialPreferences={initialPreferences}
             onPreferenceToggle={handlePreferenceToggle}

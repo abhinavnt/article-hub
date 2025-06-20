@@ -4,8 +4,6 @@ import axiosInstance from "@/utils/axiosInstance";
 
 export const getCategories=async (): Promise<Category[]>=>{
   const response = await axiosInstance.get(`/articles/categories`, { withCredentials: true });
-  console.log(response.data,"all availble category");
-  
     return response.data;
 }
 
