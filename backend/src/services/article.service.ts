@@ -5,7 +5,7 @@ import { ICategoryRepository } from "../core/interfaces/repositories/ICategoryRe
 import { IArticleRepository } from "../core/interfaces/repositories/IArticleRepository";
 import { CategoryResponseDto } from "../dto/article/response/category-response.dto";
 import cloudinary from "../config/cloudinary";
-import { ArticleResponseDto } from "../dto/article/response/article-response.dto";
+import { ArticleResponseDto, ArticleStatsDto, ArticleUpdateDto } from "../dto/article/response/article-response.dto";
 import { ObjectId, Types } from "mongoose";
 import { IArticle } from "../models/Article";
 import { ArticleFeedDto } from "../dto/article/response/article-feed.dto";
@@ -106,11 +106,11 @@ export class ArticleService implements IArticleService {
   async getAllArticles(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]> {
     const skip = (page - 1) * pageSize;
     const articles = await this.articleRepository.getAllArticles(userId, skip, pageSize);
-    console.log(articles,"articles from get all category");
-    
+    console.log(articles, "articles from get all category");
+
     const dtos = articles.map((article) => this.mapToFeedDto(article, userId));
-    console.log(dtos,"after maping the dto");
-    
+    console.log(dtos, "after maping the dto");
+
     dtos.sort((a, b) => {
       const aInteracted = a.userLiked || a.userDisliked;
       const bInteracted = b.userLiked || b.userDisliked;
@@ -142,8 +142,8 @@ export class ArticleService implements IArticleService {
   }
 
   private mapToFeedDto(article: PopulatedArticle, userId: string): ArticleFeedDto {
-    console.log(userId,"userid from maping the dto",article,"article from the dto maping");
-    
+    console.log(userId, "userid from maping the dto", article, "article from the dto maping");
+
     return {
       id: article._id ? article._id.toString() : "",
       title: article.title || "",
@@ -163,5 +163,52 @@ export class ArticleService implements IArticleService {
       createdAt: article.createdAt || new Date(),
       updatedAt: article.updatedAt || new Date(),
     };
+  }
+
+  async getUserArticles(userId: string): Promise<ArticleResponseDto[]> {
+    const articles = await this.articleRepository.getArticlesByUser(userId);
+    console.log(articles,"articles from service");
+    
+    return articles.map((article) => new ArticleResponseDto(article));
+  }
+
+  async getUserArticleStats(userId: string): Promise<ArticleStatsDto> {
+    const stats = await this.articleRepository.getUserArticleStats(userId);
+    return new ArticleStatsDto(stats);
+  }
+
+  async getArticleById(id: string): Promise<ArticleResponseDto | null> {
+    const article = await this.articleRepository.getArticleById(id);
+    return article ? new ArticleResponseDto(article) : null;
+  }
+
+  async updateArticle(id: string, data: ArticleUpdateDto, userId: string): Promise<ArticleResponseDto> {
+    const article = await this.articleRepository.getArticleById(id);
+    if (!article) throw new Error("Article not found");
+    if (article.userId !== userId) throw new Error("Unauthorized");
+
+    const category = await this.categoryRepository.findByName(data.categoryName);
+    if (!category) throw new Error("Category not found");
+
+    const updateData: Partial<IArticle> = {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      imageUrl: data.imageUrl,
+      tags: data.tags,
+      categoryId: new Types.ObjectId(category._id as string),
+      categoryName: category.name,
+    };
+
+    const updatedArticle = await this.articleRepository.updateArticle(id, updateData);
+    if (!updatedArticle) throw new Error("Failed to update article");
+    return new ArticleResponseDto(updatedArticle);
+  }
+
+  async deleteArticle(id: string, userId: string): Promise<void> {
+    const article = await this.articleRepository.getArticleById(id);
+    if (!article) throw new Error("Article not found");
+    if (article.userId !== userId) throw new Error("Unauthorized");
+    await this.articleRepository.deleteArticle(id);
   }
 }

@@ -7,7 +7,7 @@ export class ArticleResponseDto {
   content: string;
   imageUrl?: string;
   tags: string[];
-  category: CategoryResponseDto;
+  categoryName: string;
   userId: string;
   status: string;
   likeCount: number;
@@ -23,7 +23,7 @@ export class ArticleResponseDto {
     this.content = article.content;
     this.imageUrl = article.imageUrl;
     this.tags = article.tags;
-    this.category = new CategoryResponseDto(article.categoryId); 
+    this.categoryName = article.categoryName
     this.userId = article.userId;
     this.status = article.status;
     this.likeCount = article.likes.length;
@@ -31,5 +31,41 @@ export class ArticleResponseDto {
     this.blockedCount = article.blockedUsers.length;
     this.createdAt = article.createdAt;
     this.updatedAt = article.updatedAt;
+  }
+}
+
+
+
+
+
+export class ArticleStatsDto {
+  totalArticles: number;
+  totalLikes: number;
+  totalViews: number;
+  totalComments: number;
+
+  constructor(stats: any) {
+    this.totalArticles = stats.totalArticles || 0;
+    this.totalLikes = stats.totalLikes || 0;
+    this.totalViews = stats.totalViews || 0;
+    this.totalComments = stats.totalComments || 0;
+  }
+}
+
+export class ArticleUpdateDto {
+  title: string;
+  description: string;
+  content: string;
+  imageUrl?: string;
+  tags: string[];
+  categoryName: string;
+
+  constructor(data: any) {
+    this.title = data.title;
+    this.description = data.description;
+    this.content = data.content;
+    this.imageUrl = data.imageUrl;
+    this.tags = data.tags;
+    this.categoryName = data.categoryName;
   }
 }

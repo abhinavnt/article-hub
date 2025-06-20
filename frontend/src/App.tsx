@@ -8,9 +8,9 @@ import { useEffect, useState } from "react";
 import { refreshToken } from "./services/authService";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "./redux/store";
-// import { MyArticles } from "./pages/MyArticles";
+import { MyArticles } from "./pages/MyArticles";
 import { CreateArticle } from "./pages/CreateArticle";
-// import { EditArticle } from "./pages/EditArticle";
+import { EditArticle } from "./pages/EditArticle";
 import { Settings } from "./pages/Settings";
 
 
@@ -57,9 +57,9 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Navigate to="/feed" replace />} />
               <Route path="/feed" element={<Dashboard />} />
-              {/* <Route path="/my-articles" element={<MyArticles />} /> */}
+              <Route path="/my-articles" element={<MyArticles />} />
               <Route path="/create-article" element={<CreateArticle />} />
-              {/* <Route path="/edit-article/:id" element={<EditArticle />} /> */}
+              <Route path="/edit-article/:id" element={<EditArticle />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Route>

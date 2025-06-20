@@ -9,4 +9,10 @@ export interface IArticleController {
   getArticlesByPreferences(req: Request, res: Response): Promise<void>
   likeArticle(req: Request, res: Response): Promise<void>
   dislikeArticle(req: Request, res: Response): Promise<void>
+
+  getMyArticles(req: Request, res: Response): Promise<void>
+  getMyArticleStats(req: Request, res: Response): Promise<void>
+  getArticleById(req: Request, res: Response): Promise<void>
+  updateArticle(req: Request, res: Response): Promise<void>
+  deleteArticle(req: Request, res: Response): Promise<void>
 }
