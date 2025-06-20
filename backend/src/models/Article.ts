@@ -1,6 +1,7 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IArticle extends Document {
+  _id:Types.ObjectId;
   userId: string;
   categoryId: Types.ObjectId;
   categoryName:String;
@@ -10,9 +11,9 @@ export interface IArticle extends Document {
   imageUrl?: string;
   tags: string[];
   status: 'draft' | 'published';
-  likes: Types.ObjectId[];
-  dislikes: Types.ObjectId[];
-  blockedUsers:  Types.ObjectId[];
+  likes: string[];
+  dislikes: string[];
+  blockedUsers:  string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,9 +28,9 @@ const ArticleSchema = new Schema<IArticle>({
   imageUrl: { type: String },
   tags: { type: [String], default: [] },
   status: { type: String, enum: ['draft', 'published'], required: true },
-  likes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
-  dislikes:[{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
-  blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+  likes: [{ type: String, ref: "User", default: [] }],
+  dislikes:[{ type:String, ref: "User", default: [] }],
+  blockedUsers: [{ type:String, ref: "User", default: [] }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

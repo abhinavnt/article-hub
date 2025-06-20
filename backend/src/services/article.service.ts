@@ -8,6 +8,7 @@ import cloudinary from "../config/cloudinary";
 import { ArticleResponseDto } from "../dto/article/response/article-response.dto";
 import { ObjectId, Types } from "mongoose";
 import { IArticle } from "../models/Article";
+import { ArticleFeedDto } from "../dto/article/response/article-feed.dto";
 
 export interface ArticleInput {
   title: string;
@@ -16,6 +17,14 @@ export interface ArticleInput {
   tags: string[];
   categoryName: string; // Name instead of ID
 }
+
+interface IUser {
+  firstName: string;
+  lastName: string;
+  profileImageUrl: string;
+}
+
+export type PopulatedArticle = IArticle & { userInfo: IUser };
 
 @injectable()
 export class ArticleService implements IArticleService {
@@ -73,7 +82,7 @@ export class ArticleService implements IArticleService {
     const articleData: Partial<IArticle> = {
       userId,
       categoryId: new Types.ObjectId(category._id as string), // category._id is Types.ObjectId
-      categoryName:category.name,
+      categoryName: category.name,
       title: data.title,
       description: data.description,
       content: data.content,
@@ -92,5 +101,67 @@ export class ArticleService implements IArticleService {
 
   async publishArticle(data: any, userId: string, imageFile?: Express.Multer.File): Promise<ArticleResponseDto> {
     return this.createArticle(data, userId, "published", imageFile);
+  }
+
+  async getAllArticles(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]> {
+    const skip = (page - 1) * pageSize;
+    const articles = await this.articleRepository.getAllArticles(userId, skip, pageSize);
+    console.log(articles,"articles from get all category");
+    
+    const dtos = articles.map((article) => this.mapToFeedDto(article, userId));
+    console.log(dtos,"after maping the dto");
+    
+    dtos.sort((a, b) => {
+      const aInteracted = a.userLiked || a.userDisliked;
+      const bInteracted = b.userLiked || b.userDisliked;
+      return aInteracted ? 1 : bInteracted ? -1 : 0;
+    });
+    return dtos;
+  }
+
+  async getArticlesByPreferences(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]> {
+    const skip = (page - 1) * pageSize;
+
+    const articles = await this.articleRepository.getArticlesByPreferences(userId, skip, pageSize);
+
+    const dtos = articles.map((article) => this.mapToFeedDto(article, userId));
+    dtos.sort((a, b) => {
+      const aInteracted = a.userLiked || a.userDisliked;
+      const bInteracted = b.userLiked || b.userDisliked;
+      return aInteracted ? 1 : bInteracted ? -1 : 0;
+    });
+    return dtos;
+  }
+
+  async likeArticle(articleId: string, userId: string): Promise<void> {
+    await this.articleRepository.likeArticle(articleId, userId);
+  }
+
+  async dislikeArticle(articleId: string, userId: string): Promise<void> {
+    await this.articleRepository.dislikeArticle(articleId, userId);
+  }
+
+  private mapToFeedDto(article: PopulatedArticle, userId: string): ArticleFeedDto {
+    console.log(userId,"userid from maping the dto",article,"article from the dto maping");
+    
+    return {
+      id: article._id ? article._id.toString() : "",
+      title: article.title || "",
+      description: article.description || "",
+      content: article.content || "",
+      imageUrl: article.imageUrl || "",
+      tags: article.tags || [],
+      status: article.status || "",
+      categoryName: article.categoryName ? article.categoryName.toString() : "",
+      authorName: article.userInfo ? `${article.userInfo.firstName || ""} ${article.userInfo.lastName || ""}`.trim() : "",
+      authorAvatar: article.userInfo?.profileImageUrl || "",
+      userLiked: article.likes ? article.likes.some((like) => like?.toString() === userId) : false,
+      userDisliked: article.dislikes ? article.dislikes.some((dislike) => dislike?.toString() === userId) : false,
+      likeCount: article.likes ? article.likes.length : 0,
+      dislikeCount: article.dislikes ? article.dislikes.length : 0,
+      blockCount: article.blockedUsers ? article.blockedUsers.length : 0,
+      createdAt: article.createdAt || new Date(),
+      updatedAt: article.updatedAt || new Date(),
+    };
   }
 }

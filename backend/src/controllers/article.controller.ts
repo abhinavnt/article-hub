@@ -4,23 +4,21 @@ import { IArticleService } from "../core/interfaces/services/IArticleService";
 import { TYPES } from "../di/types";
 import { Request, Response } from "express";
 
-
 @injectable()
-export class ArticleController implements IArticleController{
-     constructor(@inject(TYPES.ArticleService) private articleService: IArticleService) {}
+export class ArticleController implements IArticleController {
+  constructor(@inject(TYPES.ArticleService) private articleService: IArticleService) {}
 
-
-     getCategories=async(req: Request, res: Response): Promise<void>=> {
-         try {
+  getCategories = async (req: Request, res: Response): Promise<void> => {
+    try {
       const categories = await this.articleService.getCategories();
       res.json(categories);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
-     }
+  };
 
-     createCategory=async(req: Request, res: Response): Promise<void>=> {
-         try {
+  createCategory = async (req: Request, res: Response): Promise<void> => {
+    try {
       const { name } = req.body;
       if (!name) {
         res.status(400).json({ message: "Category name is required" });
@@ -31,14 +29,14 @@ export class ArticleController implements IArticleController{
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
-     }
+  };
 
-     private async handleArticleCreation(req: Request, res: Response, status: "draft" | "published"): Promise<void> {
+  private async handleArticleCreation(req: Request, res: Response, status: "draft" | "published"): Promise<void> {
     try {
-    //   const userId = req.params.userId;
-    const userId = req.user?._id as string;
-    console.log("userid from handleArticleCreation",userId);
-    
+      //   const userId = req.params.userId;
+      const userId = req.user?._id as string;
+      console.log("userid from handleArticleCreation", userId);
+
       if (!userId) {
         res.status(401).json({ message: "Unauthorized" });
         return;
@@ -68,12 +66,63 @@ export class ArticleController implements IArticleController{
     }
   }
 
-     saveDraft=async(req: Request, res: Response): Promise<void>=> {
-         await this.handleArticleCreation(req, res, "draft");
-     }
+  saveDraft = async (req: Request, res: Response): Promise<void> => {
+    await this.handleArticleCreation(req, res, "draft");
+  };
 
-     publishArticle=async(req: Request, res: Response): Promise<void>=> {
-          await this.handleArticleCreation(req, res, "published");
-     }
+  publishArticle = async (req: Request, res: Response): Promise<void> => {
+    await this.handleArticleCreation(req, res, "published");
+  };
 
+  getAllArticles = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 9;
+      const articles = await this.articleService.getAllArticles(userId, page, pageSize);
+      res.json(articles);
+    } catch (error: any) {
+      console.log(error.stack);
+
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  getArticlesByPreferences = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 9;
+      const articles = await this.articleService.getArticlesByPreferences(userId, page, pageSize);
+      res.json(articles);
+    } catch (error: any) {
+      console.log(error);
+
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  likeArticle = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      const articleId = req.params.id;
+      await this.articleService.likeArticle(articleId, userId);
+      res.status(200).json({ message: "Article liked" });
+    } catch (error: any) {
+      console.log(error);
+
+      res.status(400).json({ message: error.message });
+    }
+  };
+
+  dislikeArticle = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      const articleId = req.params.id;
+      await this.articleService.dislikeArticle(articleId, userId);
+      res.status(200).json({ message: "Article disliked" });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  };
 }
