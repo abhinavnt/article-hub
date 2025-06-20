@@ -104,40 +104,40 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                 </svg>
-                <span>{article.likes} likes</span>
+                <span>{article.likeCount} likes</span>
               </div>
               <div className="flex items-center space-x-2 text-gray-600">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
                 </svg>
-                <span>{article.dislikes} dislikes</span>
+                <span>{article.dislikeCount} dislikes</span>
               </div>
             </div>
 
             <div className="flex items-center space-x-2">
               {onLike && (
-                <Button variant={article.isLiked ? "primary" : "outline"} size="sm" onClick={() => onLike(article.id)}>
+                <Button variant={article.userLiked ? "primary" : "outline"} size="sm" onClick={() => onLike(article.id)}>
                   <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                   </svg>
-                  {article.isLiked ? "Liked" : "Like"}
+                  {article.userLiked ? "Liked" : "Like"}
                 </Button>
               )}
 
               {onDislike && (
                 <Button
-                  variant={article.isDisliked ? "danger" : "outline"}
+                  variant={article.userDisliked ? "danger" : "outline"}
                   size="sm"
                   onClick={() => onDislike(article.id)}
                 >
                   <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
                   </svg>
-                  {article.isDisliked ? "Disliked" : "Dislike"}
+                  {article.userDisliked ? "Disliked" : "Dislike"}
                 </Button>
               )}
 
-              {onBlock && !article.isBlocked && (
+              {/* {onBlock && !article.isBlocked && (
                 <Button variant="outline" size="sm" onClick={() => onBlock(article.id)}>
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -149,7 +149,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                   </svg>
                   Block
                 </Button>
-              )}
+              )} */}
             </div>
           </div>
         )}

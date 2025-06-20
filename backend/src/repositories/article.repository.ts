@@ -35,15 +35,16 @@ export class ArticleRepository extends BaseRepository<IArticle> implements IArti
         },
         {
           $project: {
-             title: 1,
+            title: 1,
             content: 1,
             categoryName: 1,
-            description:1,
-            tags:1,
-            likes:1,
-            dislikes:1,
-            blockedUsers:1,
-            imageUrl:1,
+            description: 1,
+            tags: 1,
+            status:1,
+            likes: 1,
+            dislikes: 1,
+            blockedUsers: 1,
+            imageUrl: 1,
             createdAt: 1,
             updatedAt: 1,
             // Include any other article fields you want to return
@@ -64,7 +65,7 @@ export class ArticleRepository extends BaseRepository<IArticle> implements IArti
 
   //change the user finding to service later
   async getArticlesByPreferences(userId: string, skip: number, limit: number): Promise<PopulatedArticle[]> {
-    const user = await User.findOne({userId});
+    const user = await User.findOne({ userId });
     if (!user || !user.articlePreferences) {
       throw new Error("User or preferences not found");
     }
@@ -93,12 +94,12 @@ export class ArticleRepository extends BaseRepository<IArticle> implements IArti
             title: 1,
             content: 1,
             categoryName: 1,
-            description:1,
-            tags:1,
-            likes:1,
-            dislikes:1,
-            blockedUsers:1,
-            imageUrl:1,
+            description: 1,
+            tags: 1,
+            likes: 1,
+            dislikes: 1,
+            blockedUsers: 1,
+            imageUrl: 1,
             createdAt: 1,
             updatedAt: 1,
             // Include any other article fields needed

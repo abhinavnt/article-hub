@@ -9,12 +9,12 @@ export interface Article {
   authorId: string
   authorName: string
   authorAvatar?: string
-  likes: number
-  dislikes: number
+  likeCount: number
+  dislikeCount: number
   blocks: number
-  isLiked?: boolean
-  isDisliked?: boolean
-  isBlocked?: boolean
+  userLiked?: boolean
+  userDisliked?: boolean
+  blockCount?: boolean
   createdAt: Date
   updatedAt: Date
 }

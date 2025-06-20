@@ -65,10 +65,10 @@ export const Dashboard: React.FC = () => {
           article.id === id
             ? {
                 ...article,
-                likes: article.isLiked ? article.likes - 1 : article.likes + 1,
-                dislikes: article.isDisliked ? article.dislikes - 1 : article.dislikes,
-                isLiked: !article.isLiked,
-                isDisliked: false,
+                likeCount: article.userLiked ? article.likeCount - 1 : article.likeCount + 1,
+                dislikeCount: article.userDisliked ? article.dislikeCount - 1 : article.dislikeCount,
+                userLiked: !article.userLiked,
+                userDisliked: false,
               }
             : article
         )
@@ -78,10 +78,10 @@ export const Dashboard: React.FC = () => {
           prev
             ? {
                 ...prev,
-                likes: prev.isLiked ? prev.likes - 1 : prev.likes + 1,
-                dislikes: prev.isDisliked ? prev.dislikes - 1 : prev.dislikes,
-                isLiked: !prev.isLiked,
-                isDisliked: false,
+                likeCount: prev.userLiked ? prev.likeCount - 1 : prev.likeCount + 1,
+                dislikeCount: prev.userDisliked ? prev.dislikeCount - 1 : prev.dislikeCount,
+                userLiked: !prev.userLiked,
+                userDisliked: false,
               }
             : null
         );
@@ -102,10 +102,10 @@ export const Dashboard: React.FC = () => {
           article.id === id
             ? {
                 ...article,
-                dislikes: article.isDisliked ? article.dislikes - 1 : article.dislikes + 1,
-                likes: article.isLiked ? article.likes - 1 : article.likes,
-                isDisliked: !article.isDisliked,
-                isLiked: false,
+                dislikeCount: article.userDisliked ? article.dislikeCount - 1 : article.dislikeCount + 1,
+                likeCount: article.userLiked ? article.likeCount - 1 : article.likeCount,
+                userDisliked: !article.userDisliked,
+                userLiked: false,
               }
             : article
         )
@@ -115,10 +115,10 @@ export const Dashboard: React.FC = () => {
           prev
             ? {
                 ...prev,
-                dislikes: prev.isDisliked ? prev.dislikes - 1 : prev.dislikes + 1,
-                likes: prev.isLiked ? prev.likes - 1 : prev.likes,
-                isDisliked: !prev.isDisliked,
-                isLiked: false,
+                dislikeCount: prev.userDisliked ? prev.dislikeCount - 1 : prev.dislikeCount + 1,
+                likeCount: prev.userLiked ? prev.likeCount - 1 : prev.likeCount,
+                userDisliked: !prev.userDisliked,
+                userLiked: false,
               }
             : null
         );

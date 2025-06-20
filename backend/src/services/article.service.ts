@@ -24,7 +24,7 @@ interface IUser {
   profileImageUrl: string;
 }
 
-export type PopulatedArticle = IArticle & { userId: IUser };
+export type PopulatedArticle = IArticle & { userInfo: IUser };
 
 @injectable()
 export class ArticleService implements IArticleService {
@@ -106,7 +106,11 @@ export class ArticleService implements IArticleService {
   async getAllArticles(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]> {
     const skip = (page - 1) * pageSize;
     const articles = await this.articleRepository.getAllArticles(userId, skip, pageSize);
+    console.log(articles,"articles from get all category");
+    
     const dtos = articles.map((article) => this.mapToFeedDto(article, userId));
+    console.log(dtos,"after maping the dto");
+    
     dtos.sort((a, b) => {
       const aInteracted = a.userLiked || a.userDisliked;
       const bInteracted = b.userLiked || b.userDisliked;
@@ -138,6 +142,8 @@ export class ArticleService implements IArticleService {
   }
 
   private mapToFeedDto(article: PopulatedArticle, userId: string): ArticleFeedDto {
+    console.log(userId,"userid from maping the dto",article,"article from the dto maping");
+    
     return {
       id: article._id ? article._id.toString() : "",
       title: article.title || "",
@@ -147,8 +153,8 @@ export class ArticleService implements IArticleService {
       tags: article.tags || [],
       status: article.status || "",
       categoryName: article.categoryName ? article.categoryName.toString() : "",
-      authorName: article.userId ? `${article.userId.firstName || ""} ${article.userId.lastName || ""}`.trim() : "",
-      authorAvatar: article.userId?.profileImageUrl || "",
+      authorName: article.userInfo ? `${article.userInfo.firstName || ""} ${article.userInfo.lastName || ""}`.trim() : "",
+      authorAvatar: article.userInfo?.profileImageUrl || "",
       userLiked: article.likes ? article.likes.some((like) => like?.toString() === userId) : false,
       userDisliked: article.dislikes ? article.dislikes.some((dislike) => dislike?.toString() === userId) : false,
       likeCount: article.likes ? article.likes.length : 0,
