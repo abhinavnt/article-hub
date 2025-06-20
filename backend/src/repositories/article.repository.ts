@@ -4,6 +4,14 @@ import { Article, IArticle } from "../models/Article";
 import { User } from "../models/User";
 import { PopulatedArticle } from "../services/article.service";
 
+
+export interface ArticleStats {
+  totalArticles: number;
+  totalLikes: number;
+  totalViews: number;
+  totalComments: number;
+}
+
 export class ArticleRepository extends BaseRepository<IArticle> implements IArticleRepository {
   constructor() {
     super(Article);
@@ -125,4 +133,77 @@ export class ArticleRepository extends BaseRepository<IArticle> implements IArti
   async dislikeArticle(articleId: string, userId: string): Promise<IArticle | null> {
     return this.model.findByIdAndUpdate(articleId, { $addToSet: { dislikes: userId }, $pull: { likes: userId } }, { new: true }).exec();
   }
+
+
+  async getArticlesByUser(userId: string): Promise<PopulatedArticle[]> {
+    console.log("reached the repository");
+    
+      return this.model
+      .aggregate([
+        { $match: { userId } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "userId",
+            as: "userInfo",
+          },
+        },
+        { $unwind: "$userInfo" },
+        {
+          $project: {
+            _id:1,
+            title: 1,
+            content: 1,
+            categoryName: 1,
+            description: 1,
+            tags: 1,
+            status: 1,
+            likes: 1,
+            dislikes: 1,
+            blockedUsers: 1,
+            imageUrl: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            userId: 1,
+            "userInfo.firstName": 1,
+            "userInfo.lastName": 1,
+            "userInfo.profileImageUrl": 1,
+          },
+        },
+      ])
+      .exec();
+  }
+
+
+  async getUserArticleStats(userId: string): Promise<ArticleStats> {
+       const stats = await this.model.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: null,
+          totalArticles: { $sum: 1 },
+          totalLikes: { $sum: { $size: "$likes" } },
+          totalViews: { $sum: "$views" }, // Assumes views field exists
+          totalComments: { $sum: "$commentsCount" }, // Assumes commentsCount field exists
+        },
+      },
+    ]).exec();
+
+    return stats[0] || { totalArticles: 0, totalLikes: 0, totalViews: 0, totalComments: 0 };
+  }
+
+  async getArticleById(id: string): Promise<IArticle | null> {
+      return this.model.findById(id).exec();
+  }
+
+
+  async updateArticle(id: string, data: Partial<IArticle>): Promise<IArticle | null> {
+      return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
+
+  async deleteArticle(id: string): Promise<void> {
+      await this.model.findByIdAndDelete(id).exec();
+  }
+
 }

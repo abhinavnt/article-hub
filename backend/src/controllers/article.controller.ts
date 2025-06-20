@@ -3,6 +3,7 @@ import { IArticleController } from "../core/interfaces/controllers/IArticleContr
 import { IArticleService } from "../core/interfaces/services/IArticleService";
 import { TYPES } from "../di/types";
 import { Request, Response } from "express";
+import { ArticleUpdateDto } from "../dto/article/response/article-response.dto";
 
 @injectable()
 export class ArticleController implements IArticleController {
@@ -122,6 +123,84 @@ export class ArticleController implements IArticleController {
       await this.articleService.dislikeArticle(articleId, userId);
       res.status(200).json({ message: "Article disliked" });
     } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  };
+
+  getMyArticles = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const articles = await this.articleService.getUserArticles(userId);
+      res.json(articles);
+    } catch (error: any) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  getMyArticleStats = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const stats = await this.articleService.getUserArticleStats(userId);
+      res.json(stats);
+    } catch (error: any) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  getArticleById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const articleId = req.params.id;
+      const article = await this.articleService.getArticleById(articleId);
+      if (!article) {
+        res.status(404).json({ message: "Article not found" });
+        return;
+      }
+      res.json(article);
+    } catch (error: any) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  updateArticle = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      const articleId = req.params.id;
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const data = new ArticleUpdateDto(req.body);
+      const updatedArticle = await this.articleService.updateArticle(articleId, data, userId);
+      res.json(updatedArticle);
+    } catch (error: any) {
+      console.log(error);
+      res.status(400).json({ message: error.message });
+    }
+  };
+
+  deleteArticle = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      const articleId = req.params.id;
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      await this.articleService.deleteArticle(articleId, userId);
+      res.status(204).send();
+    } catch (error: any) {
+      console.log(error);
       res.status(400).json({ message: error.message });
     }
   };
