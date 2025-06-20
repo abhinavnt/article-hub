@@ -1,11 +1,9 @@
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FormField } from "../ui/form-field"
 import { PreferenceButtons } from "../ui/preference-buttons"
-
-import { articlePreferences } from "../../data/articlePreferences"
 import { Loader2, UserPlus } from "lucide-react"
 import {
   validateEmail,
@@ -18,6 +16,7 @@ import {
 import { registerUser, type RegisterData } from "@/services/authService"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
+import { getCategories } from "@/services/AddArticleService"
 
 interface FormErrors {
   [key: string]: string
@@ -25,6 +24,12 @@ interface FormErrors {
 
 interface RegistrationFormProps {
   onSwitchToLogin: () => void
+}
+
+interface Category {
+  id: string // Original _id from backend
+  name: string
+  createdAt: string
 }
 
 export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) => {
@@ -42,14 +47,45 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const dispatch = useDispatch();
-  const navigate=useNavigate()
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isFetchingCategories, setIsFetchingCategories] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  // Fetch categories and add the new id field with uppercase name
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories()
+        // Transform the data to include a new id field with uppercase name
+        const transformedData = data.map((cat: Category) => ({
+          ...cat,
+          id: cat.name.toUpperCase(),
+          originalId: cat.id, // Preserve original id as originalId
+        }))
+        setCategories(transformedData)
+      } catch (error) {
+        console.error("Failed to fetch categories:", error)
+        setFetchError("Failed to load categories. Please try again later.")
+      } finally {
+        setIsFetchingCategories(false)
+      }
+    }
+    fetchCategories()
+  }, [])
+
+  // Map categories to the required format, limit to 10, using the new id field
+  const limitedCategories = categories.slice(0, 12).map((cat) => ({
+    id: cat.id, // Use originalId for backend compatibility
+    label: cat.id, // Display the new uppercase id field
+  }))
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }))
     }
@@ -77,7 +113,6 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
         break
       case "password":
         error = validatePassword(value)
-        // Also revalidate password confirmation if it exists
         if (formData.passwordConfirmation) {
           const confirmError = validatePasswordConfirmation(value, formData.passwordConfirmation)
           setErrors((prev) => ({ ...prev, passwordConfirmation: confirmError }))
@@ -103,20 +138,21 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    // Validate all fields
     newErrors.firstName = validateName(formData.firstName, "First name")
     newErrors.lastName = validateName(formData.lastName, "Last name")
     newErrors.email = validateEmail(formData.email)
     newErrors.phone = validateIndianPhone(formData.phone)
     newErrors.dateOfBirth = validateDateOfBirth(formData.dateOfBirth)
     newErrors.password = validatePassword(formData.password)
-    newErrors.passwordConfirmation = validatePasswordConfirmation(formData.password, formData.passwordConfirmation)
+    newErrors.passwordConfirmation = validatePasswordConfirmation(
+      formData.password,
+      formData.passwordConfirmation
+    )
 
     if (formData.articlePreferences.length === 0) {
       newErrors.articlePreferences = "Please select at least one article preference"
     }
 
-    // Remove empty errors
     Object.keys(newErrors).forEach((key) => {
       if (!newErrors[key]) {
         delete newErrors[key]
@@ -134,14 +170,12 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
 
     setIsLoading(true)
     try {
-     const response=await registerUser(formData,dispatch)
-     if(response.status==400){
-
-       setErrorMessage(response.data.message)
-       return
-     }
-      console.log(response);
-      
+      const response = await registerUser(formData, dispatch)
+      if (response.status === 400) {
+        setErrorMessage(response.data.message)
+        return
+      }
+      console.log(response)
       setFormData({
         firstName: "",
         lastName: "",
@@ -154,9 +188,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
       })
       setErrors({})
       navigate("/feed")
-
     } catch (error: any) {
-      setErrors({ submit: error.response?.data?.message || "Registration failed. Please try again." })
+      setErrors({
+        submit: error.response?.data?.message || "Registration failed. Please try again.",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -267,14 +302,23 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
             </div>
 
             <div className="bg-gray-50 p-4 sm:p-6 md:p-8 rounded-2xl">
-              <PreferenceButtons
-                label="What interests you?"
-                options={articlePreferences}
-                selectedValues={formData.articlePreferences}
-                onChange={handlePreferencesChange}
-                error={errors.articlePreferences}
-                required
-              />
+              {isFetchingCategories ? (
+                <div className="text-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                  <p className="mt-2 text-gray-600">Loading categories...</p>
+                </div>
+              ) : fetchError ? (
+                <div className="text-center py-4 text-red-600">{fetchError}</div>
+              ) : (
+                <PreferenceButtons
+                  label="What interests you?"
+                  options={limitedCategories}
+                  selectedValues={formData.articlePreferences}
+                  onChange={handlePreferencesChange}
+                  error={errors.articlePreferences}
+                  required
+                />
+              )}
             </div>
 
             {errors.submit && (

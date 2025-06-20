@@ -9,7 +9,7 @@ import { upload } from "../config/multer";
 const router = Router();
 const articleController = container.get<IArticleController>(TYPES.ArticleController);
 
-router.get("/categories", authMiddleware([UserRole.USER]), articleController.getCategories);
+router.get("/categories", articleController.getCategories);
 router.post("/categories", authMiddleware([UserRole.USER]), articleController.createCategory);
 router.post("/draft", authMiddleware([UserRole.USER]), upload.single("image"), articleController.saveDraft);
 router.post("/publish", authMiddleware([UserRole.USER]), upload.single("image"), articleController.publishArticle);

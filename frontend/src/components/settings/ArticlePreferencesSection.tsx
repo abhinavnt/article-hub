@@ -1,11 +1,16 @@
-
 import type React from "react"
 import { useMemo } from "react"
 import { Card } from "../ui/CustomCard"
 import { Button } from "../ui/CustomButton"
+import { PreferenceButtons } from "../ui/preference-buttons"
+
+interface Option {
+  id: string
+  label: string
+}
 
 interface ArticlePreferencesSectionProps {
-  availablePreferences: string[]
+  availablePreferences: Option[]
   selectedPreferences: string[]
   initialPreferences?: string[]
   onPreferenceToggle: (preference: string) => void
@@ -32,37 +37,28 @@ export const ArticlePreferencesSection: React.FC<ArticlePreferencesSectionProps>
 
   const hasError = selectedPreferences.length === 0
 
+  // Handle changes from PreferenceButtons
+  const handlePreferenceChange = (newSelected: string[]) => {
+    const added = newSelected.filter(p => !selectedPreferences.includes(p))
+    const removed = selectedPreferences.filter(p => !newSelected.includes(p))
+    added.forEach(p => onPreferenceToggle(p))
+    removed.forEach(p => onPreferenceToggle(p))
+  }
+
+  
   return (
     <Card>
       <h2 className="text-xl font-semibold text-black mb-6">Article Preferences</h2>
       <p className="text-gray-600 mb-4">Select the topics you're interested in to personalize your article feed.</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {availablePreferences.map((preference) => (
-          <label
-            key={preference}
-            className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors ${
-              selectedPreferences.includes(preference)
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:bg-gray-50"
-            }`}
-          >
-            <input
-              type="checkbox"
-              checked={selectedPreferences.includes(preference)}
-              onChange={() => onPreferenceToggle(preference)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-sm font-medium text-gray-700">{preference}</span>
-          </label>
-        ))}
-      </div>
-
-      {hasError && (
-        <p className="mt-3 text-sm text-red-600 bg-red-50 p-3 rounded-md">
-          Please select at least one preference to personalize your experience
-        </p>
-      )}
+      <PreferenceButtons
+        label="Select your article preferences"
+        options={availablePreferences}
+        selectedValues={selectedPreferences}
+        onChange={handlePreferenceChange}
+        error={hasError ? "Please select at least one preference to personalize your experience" : undefined}
+        required={true}
+      />
 
       <div className="mt-6 flex justify-end">
         <Button onClick={onSubmit} loading={loading} disabled={!hasChanges || hasError || loading}>

@@ -26,9 +26,9 @@ export class ArticleResponseDto {
     this.category = new CategoryResponseDto(article.categoryId); 
     this.userId = article.userId;
     this.status = article.status;
-    this.likeCount = article.likeCount;
-    this.dislikeCount = article.dislikeCount;
-    this.blockedCount = article.blockedCount;
+    this.likeCount = article.likes.length;
+    this.dislikeCount = article.dislikes.length;
+    this.blockedCount = article.blockedUsers.length;
     this.createdAt = article.createdAt;
     this.updatedAt = article.updatedAt;
   }
