@@ -77,7 +77,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLo
   }, [])
 
   // Map categories to the required format, limit to 10, using the new id field
-  const limitedCategories = categories.slice(0, 10).map((cat) => ({
+  const limitedCategories = categories.slice(0, 12).map((cat) => ({
     id: cat.id, // Use originalId for backend compatibility
     label: cat.id, // Display the new uppercase id field
   }))

@@ -73,15 +73,13 @@ export class ArticleService implements IArticleService {
     const articleData: Partial<IArticle> = {
       userId,
       categoryId: new Types.ObjectId(category._id as string), // category._id is Types.ObjectId
+      categoryName:category.name,
       title: data.title,
       description: data.description,
       content: data.content,
       imageUrl,
       tags: data.tags,
       status,
-      likeCount: 0,
-      dislikeCount: 0,
-      blockedCount: 0,
     };
 
     const article = await this.articleRepository.createArticle(articleData);
