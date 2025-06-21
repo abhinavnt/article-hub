@@ -84,7 +84,7 @@ export class AuthService implements IAuthService {
       throw new Error("Invalid refresh token");
     }
 
-    const newAccessToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "15m");
+    const newAccessToken = generateToken({ userId: user.userId, role: UserRole.USER }, process.env.JWT_SECRET || "secret", "60m");
 
     return { accessToken: newAccessToken, user: new UserResponseDto(user) };
   }
