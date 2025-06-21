@@ -39,7 +39,10 @@ export const getArticleById = async (id: string): Promise<EditArticleType> => {
 };
 
 export const updateArticle = async (id: string, data: FormData): Promise<void> => {
-  await axiosInstance.put(`/articles/${id}`, data);
+  await axiosInstance.put(`/articles/${id}`, data,{
+      withCredentials: true,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 };
 
 export const deleteArticle = async (id: string): Promise<void> => {

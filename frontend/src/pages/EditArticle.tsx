@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -159,6 +157,8 @@ export const EditArticle: React.FC = () => {
       formDataToSend.append("title", formData.title)
       formDataToSend.append("description", formData.description)
       formDataToSend.append("content", formData.content)
+      console.log(formData.image,"form image");
+      
       if (formData.image) {
         formDataToSend.append("image", formData.image)
       }

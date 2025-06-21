@@ -172,7 +172,7 @@ export class ArticleController implements IArticleController {
     }
   };
 
- updateArticle = async (req: Request, res: Response): Promise<void> => {
+  updateArticle = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.user?._id as string;
       const articleId = req.params.id;
@@ -190,7 +190,7 @@ export class ArticleController implements IArticleController {
         content,
         tags: tags ? JSON.parse(tags) : [],
         categoryName: category,
-        status
+        status,
       };
 
       const updatedArticle = await this.articleService.updateArticle(articleId, data, userId, imageFile);

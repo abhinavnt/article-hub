@@ -167,8 +167,6 @@ export class ArticleService implements IArticleService {
 
   async getUserArticles(userId: string): Promise<ArticleResponseDto[]> {
     const articles = await this.articleRepository.getArticlesByUser(userId);
-    console.log(articles,"articles from service");
-    
     return articles.map((article) => new ArticleResponseDto(article));
   }
 
@@ -182,12 +180,7 @@ export class ArticleService implements IArticleService {
     return article ? new ArticleResponseDto(article) : null;
   }
 
-  async updateArticle(
-    id: string,
-    data: any,
-    userId: string,
-    imageFile?: Express.Multer.File
-  ): Promise<ArticleResponseDto> {
+  async updateArticle(id: string, data: any, userId: string, imageFile?: Express.Multer.File): Promise<ArticleResponseDto> {
     const article = await this.articleRepository.getArticleById(id);
     if (!article) throw new Error("Article not found");
     if (article.userId !== userId) throw new Error("Unauthorized");
@@ -196,11 +189,10 @@ export class ArticleService implements IArticleService {
     if (!category) {
       category = await this.categoryRepository.createCategory({ name: data.categoryName });
     }
-
     let imageUrl = article.imageUrl;
     if (imageFile) {
-      const uploadResult = await cloudinary.uploader.upload(imageFile.path);
-      imageUrl = uploadResult.secure_url;
+      const uploadResult = await this.uploadImage(imageFile);
+      imageUrl = uploadResult;
     }
 
     const updateData: Partial<IArticle> = {
