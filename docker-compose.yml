@@ -1,0 +1,35 @@
+services:
+ backend:
+  image: backend
+  build:
+   context: ./backend
+   dockerfile: Dockerfile
+  ports:
+   - "5000:5000"
+  env_file:
+   - ./backend/.env
+  networks:
+   - app-network
+  volumes:
+   - ./backend/src:/app/src
+
+ frontend:
+  image: frontend
+  build:
+   context: ./frontend
+   dockerfile: Dockerfile
+  ports:
+   - "5173:5173"
+  env_file:
+   - ./frontend/.env
+  networks:
+   - app-network
+  depends_on:
+   - backend
+  volumes:
+   - ./frontend/src:/app/src
+ 
+
+networks:
+ app-network:
+  driver:  bridge
