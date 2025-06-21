@@ -3,7 +3,7 @@ import { useState } from "react"
 import type { Article } from "@/types/article"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ConfirmationModal } from "../ui/ConfirmationModal"
+import { ConfirmationModal } from "../ui/BlockConfirmationModal"
 
 interface ArticleCardProps {
   article: Article

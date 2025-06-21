@@ -36,7 +36,6 @@ export const EditArticle: React.FC = () => {
   const [categories, setCategories] = useState<EditCategory[]>([])
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
-  const [loadingCategories, setLoadingCategories] = useState(false)
   const [errors, setErrors] = useState<EditValidationErrors>({})
   const [showCategoryModal, setShowCategoryModal] = useState(false)
 
@@ -294,7 +293,6 @@ export const EditArticle: React.FC = () => {
               onCategorySelect={(categoryName) => handleInputChange("category", categoryName)}
               onCreateNew={() => setShowCategoryModal(true)}
               error={errors.category}
-              loading={loadingCategories}
             />
 
             <TagInput

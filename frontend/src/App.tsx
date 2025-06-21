@@ -13,6 +13,7 @@ import { CreateArticle } from "./pages/CreateArticle";
 import { EditArticle } from "./pages/EditArticle";
 import { Settings } from "./pages/Settings";
 import { Toaster } from "sonner";
+import { Loading } from "./components/ui/Loading";
 
 
 function App() {
@@ -47,6 +48,16 @@ function App() {
     };
     fetchUser();
   }, [dispatch, isAuthenticated]);
+
+
+ if (loading) {
+  return (
+    <div className="flex items-center justify-center h-screen w-full">
+      <Loading size="lg" text="Loading..." />
+    </div>
+  );
+}
+
 
   return (
     <>
