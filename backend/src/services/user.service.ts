@@ -20,7 +20,6 @@ export class UserService implements IUserService {
   }
 
   async updatePreferences(userId: string, data: UpdatePreferencesDto): Promise<UserResponseDto> {
-    console.log("reached the service");
 
     const user = await this.userRepository.updateUser(userId, data);
     if (!user) {
@@ -30,16 +29,7 @@ export class UserService implements IUserService {
   }
 
   async updateProfilePhoto(userId: string, file: Express.Multer.File): Promise<UserResponseDto> {
-    console.log("reached the service updateProfilePhoto");
-    console.log(
-      {
-        fieldname: file.fieldname,
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-      },
-      "file metadata"
-    );
+    
 
     // Validate file
     if (!file.mimetype.startsWith("image/")) {
@@ -66,7 +56,6 @@ export class UserService implements IUserService {
       bufferStream.pipe(uploadStream);
     });
 
-    console.log(result, "result from Cloudinary");
 
     const imageUrl = result.secure_url;
 

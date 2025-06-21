@@ -106,10 +106,8 @@ export class ArticleService implements IArticleService {
   async getAllArticles(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]> {
     const skip = (page - 1) * pageSize;
     const articles = await this.articleRepository.getAllArticles(userId, skip, pageSize);
-    console.log(articles, "articles from get all category");
 
     const dtos = articles.map((article) => this.mapToFeedDto(article, userId));
-    console.log(dtos, "after maping the dto");
 
     dtos.sort((a, b) => {
       const aInteracted = a.userLiked || a.userDisliked;
@@ -146,7 +144,6 @@ export class ArticleService implements IArticleService {
   }
 
   private mapToFeedDto(article: PopulatedArticle, userId: string): ArticleFeedDto {
-    console.log(userId, "userid from maping the dto", article, "article from the dto maping");
 
     return {
       id: article._id ? article._id.toString() : "",
