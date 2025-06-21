@@ -4,6 +4,7 @@ import type { Article } from "@/types/article"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ConfirmationModal } from "../ui/BlockConfirmationModal"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
 
 interface ArticleCardProps {
   article: Article
@@ -49,9 +50,10 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
         <div className="space-y-4">
           {article.imageUrl && (
             <img
+              onClick={() => onView(article)}
               src={article.imageUrl || "/placeholder.svg"}
               alt={article.title}
-              className="w-full h-48 object-cover rounded-lg"
+              className="w-full h-48 cursor-pointer object-cover rounded-lg"
             />
           )}
 
@@ -102,52 +104,73 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
               </Button>
 
               {showActions && (
-                <div className="flex items-center space-x-1">
-                  {onLike && (
-                    <button
-                      onClick={() => onLike(article.id)}
-                      className={`p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors ${
-                        article.userLiked ? "text-blue-600" : "text-gray-400"
-                      }`}
-                      aria-label="Like article"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                      </svg>
-                    </button>
-                  )}
+                <TooltipProvider>
+                  <div className="flex items-center space-x-1">
+                    {onLike && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => onLike(article.id)}
+                            className={`p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors ${article.userLiked ? "text-blue-600" : "text-gray-400"
+                              }`}
+                            aria-label="Like article"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                            </svg>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{article.userLiked ? "Like" : "Like"} article</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
 
-                  {onDislike && (
-                    <button
-                      onClick={() => onDislike(article.id)}
-                      className={`p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors ${
-                        article.userDisliked ? "text-red-600" : "text-gray-400"
-                      }`}
-                      aria-label="Dislike article"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
-                      </svg>
-                    </button>
-                  )}
+                    {onDislike && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => onDislike(article.id)}
+                            className={`p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors ${article.userDisliked ? "text-red-600" : "text-gray-400"
+                              }`}
+                            aria-label="Dislike article"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+                            </svg>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{article.userDisliked ? "Dislike" : "Dislike"} article</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
 
-                  {onBlock && (
-                    <button
-                      onClick={handleBlockClick}
-                      className="p-2 cursor-pointer rounded hover:bg-gray-100 text-gray-400 hover:text-red-600 transition-colors"
-                      aria-label="Block article"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
+                    {onBlock && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={handleBlockClick}
+                            className="p-2 cursor-pointer rounded hover:bg-gray-100 text-gray-400 hover:text-red-600 transition-colors"
+                            aria-label="Block article"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"
+                              />
+                            </svg>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Block article</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                </TooltipProvider>
               )}
             </div>
           </div>
