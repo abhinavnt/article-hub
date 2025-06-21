@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import type { Article, ArticleFormData, Category, ValidationErrors } from "../types/article"
 import { Save, ArrowLeft } from "lucide-react"
 import { Card } from "@/components/ui/CustomCard"
 import { Input } from "@/components/ui/CustomInput"
@@ -16,14 +15,16 @@ import { useAppSelector } from "@/redux/store"
 import { getArticleById, updateArticle } from "@/services/articleService"
 import { getCategories, createCategory } from "@/services/AddArticleService"
 import { CategorySelector } from "@/components/create-articles/CategorySelector"
+import type { EditArticleFormData, EditArticleType, EditCategory, EditValidationErrors } from "@/types/article"
+
 
 export const EditArticle: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth)
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
 
-  const [article, setArticle] = useState<Article | null>(null)
-  const [formData, setFormData] = useState<ArticleFormData>({
+  const [article, setArticle] = useState<EditArticleType | null>(null)
+  const [formData, setFormData] = useState<EditArticleFormData>({
     title: "",
     description: "",
     content: "",
@@ -31,13 +32,13 @@ export const EditArticle: React.FC = () => {
     tags: [],
     category: "",
     newCategory: "",
+    status: "draft",
   })
-
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<EditCategory[]>([])
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const [loadingCategories, setLoadingCategories] = useState(false)
-  const [errors, setErrors] = useState<ValidationErrors>({})
+  const [errors, setErrors] = useState<EditValidationErrors>({})
   const [showCategoryModal, setShowCategoryModal] = useState(false)
 
   useEffect(() => {
@@ -52,7 +53,10 @@ export const EditArticle: React.FC = () => {
 
     setInitialLoading(true)
     try {
-      const [articleData, availableCategories] = await Promise.all([getArticleById(id), getCategories()])
+      const [articleData, availableCategories] = await Promise.all([
+        getArticleById(id) ,
+        getCategories() as Promise<EditCategory[]>,
+      ])
 
       if (!articleData) {
         alert("Article not found")
@@ -60,8 +64,6 @@ export const EditArticle: React.FC = () => {
         return
       }
 
-      // Check if user owns this article
-   
 
       setArticle(articleData)
       setFormData({
@@ -72,6 +74,7 @@ export const EditArticle: React.FC = () => {
         tags: articleData.tags,
         category: articleData.category,
         newCategory: "",
+        status: articleData.status || "draft",
       })
       setCategories(availableCategories)
     } catch (error) {
@@ -83,7 +86,7 @@ export const EditArticle: React.FC = () => {
     }
   }
 
-  const validateField = (field: keyof ArticleFormData, value: any): string | undefined => {
+  const validateField = (field: keyof EditArticleFormData, value: any): string | undefined => {
     switch (field) {
       case "title":
         if (!value || !value.trim()) return "Title is required"
@@ -106,21 +109,22 @@ export const EditArticle: React.FC = () => {
       case "tags":
         if (!Array.isArray(value) || value.length === 0) return "At least one tag is required"
         break
+      case "status":
+        if (!["draft", "published"].includes(value)) return "Invalid status"
+        break
     }
     return undefined
   }
 
-  const handleInputChange = (field: keyof ArticleFormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-
-    // Real-time validation
+  const handleInputChange = (field: keyof EditArticleFormData, value: any) => {
+    setFormData((prev: EditArticleFormData) => ({ ...prev, [field]: value }))
     const error = validateField(field, value)
-    setErrors((prev) => ({ ...prev, [field]: error }))
+    setErrors((prev: EditValidationErrors) => ({ ...prev, [field]: error }))
   }
 
   const handleCreateCategory = async (categoryName: string) => {
     try {
-      const newCategory = await createCategory(categoryName)
+      const newCategory = await createCategory(categoryName) as EditCategory
       setCategories((prev) => [...prev, newCategory])
       handleInputChange("category", newCategory.name)
     } catch (error) {
@@ -129,26 +133,20 @@ export const EditArticle: React.FC = () => {
   }
 
   const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {}
-
-    // Validate all fields
+    const newErrors: EditValidationErrors = {}
     Object.keys(formData).forEach((key) => {
-      const field = key as keyof ArticleFormData
+      const field = key as keyof EditArticleFormData
       if (field !== "newCategory" && field !== "image") {
         const error = validateField(field, formData[field])
-        if (error) {
-          newErrors[field] = error
-        }
+        if (error) newErrors[field] = error
       }
     })
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!validateForm() || !user || !id) {
       const firstErrorElement = document.querySelector(".text-red-600")
       firstErrorElement?.scrollIntoView({ behavior: "smooth", block: "center" })
@@ -166,6 +164,7 @@ export const EditArticle: React.FC = () => {
       }
       formDataToSend.append("tags", JSON.stringify(formData.tags))
       formDataToSend.append("category", formData.category)
+      formDataToSend.append("status", formData.status)
       if (formData.newCategory) {
         formDataToSend.append("newCategory", formData.newCategory)
       }
@@ -194,7 +193,6 @@ export const EditArticle: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="mb-10">
           <Button
             variant="ghost"
@@ -212,7 +210,6 @@ export const EditArticle: React.FC = () => {
 
         <Card>
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Title */}
             <Input
               label="Article Title"
               value={formData.title}
@@ -221,7 +218,6 @@ export const EditArticle: React.FC = () => {
               error={errors.title}
             />
 
-            {/* Description */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-900">
@@ -253,7 +249,6 @@ export const EditArticle: React.FC = () => {
               {errors.description && <p className="text-sm text-red-600 font-medium">{errors.description}</p>}
             </div>
 
-            {/* Content */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-900">
@@ -285,7 +280,6 @@ export const EditArticle: React.FC = () => {
               {errors.content && <p className="text-sm text-red-600 font-medium">{errors.content}</p>}
             </div>
 
-            {/* Image Upload */}
             <ImageUpload
               onImageSelect={(file) => handleInputChange("image", file)}
               error={errors.image}
@@ -293,7 +287,6 @@ export const EditArticle: React.FC = () => {
               existingImageUrl={article.imageUrl}
             />
 
-            {/* Category Selection */}
             <CategorySelector
               categories={categories}
               selectedCategory={formData.category}
@@ -303,14 +296,31 @@ export const EditArticle: React.FC = () => {
               loading={loadingCategories}
             />
 
-            {/* Tags */}
             <TagInput
               tags={formData.tags}
               onTagsChange={(tags) => handleInputChange("tags", tags)}
               error={errors.tags}
             />
 
-            {/* Action Buttons */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">
+                Status <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => handleInputChange("status", e.target.value)}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 ${
+                  errors.status
+                    ? "border-red-500 bg-red-50 focus:border-red-600"
+                    : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
+                }`}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+              {errors.status && <p className="text-sm text-red-600 font-medium">{errors.status}</p>}
+            </div>
+
             <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t-2 border-gray-100 space-y-4 sm:space-y-0 gap-4">
               <Button
                 type="button"
@@ -338,7 +348,6 @@ export const EditArticle: React.FC = () => {
           </form>
         </Card>
 
-        {/* Create Category Modal */}
         <CreateCategoryModal
           isOpen={showCategoryModal}
           onClose={() => setShowCategoryModal(false)}

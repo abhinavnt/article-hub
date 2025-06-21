@@ -1,4 +1,4 @@
-import type { Article, ArticleFormData, ArticleStats } from "@/types/article";
+import type { Article, ArticleFormData, ArticleStats, EditArticleType } from "@/types/article";
 import axiosInstance from "@/utils/axiosInstance";
 
 export const getAllArticles = async (page: number, pageSize: number): Promise<Article[]> => {
@@ -33,7 +33,7 @@ export const getUserArticleStats = async (): Promise<ArticleStats> => {
   return response.data;
 };
 
-export const getArticleById = async (id: string): Promise<Article> => {
+export const getArticleById = async (id: string): Promise<EditArticleType> => {
   const response = await axiosInstance.get(`/articles/${id}`);
   return response.data;
 };

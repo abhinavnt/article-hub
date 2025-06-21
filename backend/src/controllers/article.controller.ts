@@ -172,7 +172,7 @@ export class ArticleController implements IArticleController {
     }
   };
 
-  updateArticle = async (req: Request, res: Response): Promise<void> => {
+ updateArticle = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.user?._id as string;
       const articleId = req.params.id;
@@ -180,8 +180,20 @@ export class ArticleController implements IArticleController {
         res.status(401).json({ message: "Unauthorized" });
         return;
       }
-      const data = new ArticleUpdateDto(req.body);
-      const updatedArticle = await this.articleService.updateArticle(articleId, data, userId);
+
+      const { title, description, content, tags, category, status } = req.body;
+      const imageFile = req.file;
+
+      const data = {
+        title,
+        description,
+        content,
+        tags: tags ? JSON.parse(tags) : [],
+        categoryName: category,
+        status
+      };
+
+      const updatedArticle = await this.articleService.updateArticle(articleId, data, userId, imageFile);
       res.json(updatedArticle);
     } catch (error: any) {
       console.log(error);

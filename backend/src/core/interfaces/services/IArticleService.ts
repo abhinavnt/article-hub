@@ -8,14 +8,14 @@ export interface IArticleService {
   saveDraft(data: any, userId: string, imageFile?: Express.Multer.File): Promise<ArticleResponseDto>;
   publishArticle(data: any, userId: string, imageFile?: Express.Multer.File): Promise<ArticleResponseDto>;
 
-  getAllArticles(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]>
-  getArticlesByPreferences(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]>
-  likeArticle(articleId: string, userId: string): Promise<void>
-  dislikeArticle(articleId: string, userId: string): Promise<void>
+  getAllArticles(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]>;
+  getArticlesByPreferences(userId: string, page: number, pageSize: number): Promise<ArticleFeedDto[]>;
+  likeArticle(articleId: string, userId: string): Promise<void>;
+  dislikeArticle(articleId: string, userId: string): Promise<void>;
 
-  getUserArticles(userId: string): Promise<ArticleResponseDto[]>
-   getUserArticleStats(userId: string): Promise<ArticleStatsDto>
-   getArticleById(id: string): Promise<ArticleResponseDto | null>
-   updateArticle(id: string, data: ArticleUpdateDto, userId: string): Promise<ArticleResponseDto>
-   deleteArticle(id: string, userId: string): Promise<void>
+  getUserArticles(userId: string): Promise<ArticleResponseDto[]>;
+  getUserArticleStats(userId: string): Promise<ArticleStatsDto>;
+  getArticleById(id: string): Promise<ArticleResponseDto | null>;
+  updateArticle(id: string, data: any, userId: string, imageFile?: Express.Multer.File): Promise<ArticleResponseDto>;
+  deleteArticle(id: string, userId: string): Promise<void>;
 }

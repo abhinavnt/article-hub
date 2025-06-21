@@ -19,10 +19,10 @@ router.get("/preferences", authMiddleware([UserRole.USER]), articleController.ge
 router.put("/:id/like", authMiddleware([UserRole.USER]), articleController.likeArticle);
 router.put("/:id/dislike", authMiddleware([UserRole.USER]), articleController.dislikeArticle);
 
-  router.get("/my",authMiddleware([UserRole.USER]),articleController.getMyArticles );
-  router.get("/my/stats",authMiddleware([UserRole.USER]),articleController.getMyArticleStats );
-  router.get("/:id",authMiddleware([UserRole.USER]),articleController.getArticleById );
-  router.put("/:id",authMiddleware([UserRole.USER]),articleController.updateArticle );
-  router.delete("/:id",authMiddleware([UserRole.USER]),articleController.deleteArticle );
+router.get("/my", authMiddleware([UserRole.USER]), articleController.getMyArticles);
+router.get("/my/stats", authMiddleware([UserRole.USER]), articleController.getMyArticleStats);
+router.get("/:id", authMiddleware([UserRole.USER]), articleController.getArticleById);
+router.put("/:id", authMiddleware([UserRole.USER]), upload.single("image"), articleController.updateArticle);
+router.delete("/:id", authMiddleware([UserRole.USER]), articleController.deleteArticle);
 
 export default router;
