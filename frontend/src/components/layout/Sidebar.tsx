@@ -115,12 +115,12 @@ export const Sidebar: React.FC = () => {
                 </div>
 
                 {/* Navigation */}
-                <nav className="mt-5 flex-1 px-2 space-y-1">
+                <nav className="mt-5  flex-1 px-2 space-y-1">
                     {navItems.map((item) => (
                         <button
                             key={item.key}
                             onClick={() => navigate(item.path)}
-                            className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors ${isCurrentPath(item.path) ? "bg-black text-white" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            className={`group cursor-pointer flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors ${isCurrentPath(item.path) ? "bg-black text-white" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                 }`}
                         >
                             <span
