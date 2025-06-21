@@ -17,7 +17,6 @@ export const Dashboard: React.FC = () => {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const pageSize = 9;
@@ -57,19 +56,18 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleLike = async (id: string) => {
-    setActionLoading(id);
     try {
       await likeArticle(id);
       setArticles((prev) =>
         prev.map((article) =>
           article.id === id
             ? {
-                ...article,
-                likeCount: article.userLiked ? article.likeCount - 1 : article.likeCount + 1,
-                dislikeCount: article.userDisliked ? article.dislikeCount - 1 : article.dislikeCount,
-                userLiked: !article.userLiked,
-                userDisliked: false,
-              }
+              ...article,
+              likeCount: article.userLiked ? article.likeCount - 1 : article.likeCount + 1,
+              dislikeCount: article.userDisliked ? article.dislikeCount - 1 : article.dislikeCount,
+              userLiked: !article.userLiked,
+              userDisliked: false,
+            }
             : article
         )
       );
@@ -77,36 +75,33 @@ export const Dashboard: React.FC = () => {
         setSelectedArticle((prev) =>
           prev
             ? {
-                ...prev,
-                likeCount: prev.userLiked ? prev.likeCount - 1 : prev.likeCount + 1,
-                dislikeCount: prev.userDisliked ? prev.dislikeCount - 1 : prev.dislikeCount,
-                userLiked: !prev.userLiked,
-                userDisliked: false,
-              }
+              ...prev,
+              likeCount: prev.userLiked ? prev.likeCount - 1 : prev.likeCount + 1,
+              dislikeCount: prev.userDisliked ? prev.dislikeCount - 1 : prev.dislikeCount,
+              userLiked: !prev.userLiked,
+              userDisliked: false,
+            }
             : null
         );
       }
     } catch (error) {
       console.error("Failed to like article:", error);
-    } finally {
-      setActionLoading(null);
     }
   };
 
   const handleDislike = async (id: string) => {
-    setActionLoading(id);
     try {
       await dislikeArticle(id);
       setArticles((prev) =>
         prev.map((article) =>
           article.id === id
             ? {
-                ...article,
-                dislikeCount: article.userDisliked ? article.dislikeCount - 1 : article.dislikeCount + 1,
-                likeCount: article.userLiked ? article.likeCount - 1 : article.likeCount,
-                userDisliked: !article.userDisliked,
-                userLiked: false,
-              }
+              ...article,
+              dislikeCount: article.userDisliked ? article.dislikeCount - 1 : article.dislikeCount + 1,
+              likeCount: article.userLiked ? article.likeCount - 1 : article.likeCount,
+              userDisliked: !article.userDisliked,
+              userLiked: false,
+            }
             : article
         )
       );
@@ -114,24 +109,21 @@ export const Dashboard: React.FC = () => {
         setSelectedArticle((prev) =>
           prev
             ? {
-                ...prev,
-                dislikeCount: prev.userDisliked ? prev.dislikeCount - 1 : prev.dislikeCount + 1,
-                likeCount: prev.userLiked ? prev.likeCount - 1 : prev.likeCount,
-                userDisliked: !prev.userDisliked,
-                userLiked: false,
-              }
+              ...prev,
+              dislikeCount: prev.userDisliked ? prev.dislikeCount - 1 : prev.dislikeCount + 1,
+              likeCount: prev.userLiked ? prev.likeCount - 1 : prev.likeCount,
+              userDisliked: !prev.userDisliked,
+              userLiked: false,
+            }
             : null
         );
       }
     } catch (error) {
       console.error("Failed to dislike article:", error);
-    } finally {
-      setActionLoading(null);
     }
   };
 
   const handleBlock = async (id: string) => {
-    setActionLoading(id);
     try {
       await blockArticle(id);
       setArticles((prev) => prev.filter((article) => article.id !== id));
@@ -141,8 +133,6 @@ export const Dashboard: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to block article:", error);
-    } finally {
-      setActionLoading(null);
     }
   };
 

@@ -134,6 +134,10 @@ export class ArticleRepository extends BaseRepository<IArticle> implements IArti
     return this.model.findByIdAndUpdate(articleId, { $addToSet: { dislikes: userId }, $pull: { likes: userId } }, { new: true }).exec();
   }
 
+  async blockArticle(articleId: string, userId: string): Promise<IArticle|null> {
+    return await this.model.findByIdAndUpdate(articleId,{$addToSet:{blockedUsers:userId}},{new:true})
+  }
+
 
   async getArticlesByUser(userId: string): Promise<PopulatedArticle[]> {
     console.log("reached the repository");

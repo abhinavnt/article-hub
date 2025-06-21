@@ -13,4 +13,5 @@ export interface IArticleRepository {
   getArticleById(id: string): Promise<IArticle | null>
   updateArticle(id: string, data: Partial<IArticle>): Promise<IArticle | null> 
   deleteArticle(id: string): Promise<void>
+  blockArticle(articleId: string, userId: string): Promise<IArticle|null>
 }

@@ -141,6 +141,10 @@ export class ArticleService implements IArticleService {
     await this.articleRepository.dislikeArticle(articleId, userId);
   }
 
+  async blockArticle(articleId: string, userId: string): Promise<IArticle|null> {
+     return await this.articleRepository.blockArticle(articleId,userId)
+  }
+
   private mapToFeedDto(article: PopulatedArticle, userId: string): ArticleFeedDto {
     console.log(userId, "userid from maping the dto", article, "article from the dto maping");
 
@@ -167,8 +171,6 @@ export class ArticleService implements IArticleService {
 
   async getUserArticles(userId: string): Promise<ArticleResponseDto[]> {
     const articles = await this.articleRepository.getArticlesByUser(userId);
-    console.log(articles,"articles from service");
-    
     return articles.map((article) => new ArticleResponseDto(article));
   }
 
@@ -182,22 +184,30 @@ export class ArticleService implements IArticleService {
     return article ? new ArticleResponseDto(article) : null;
   }
 
-  async updateArticle(id: string, data: ArticleUpdateDto, userId: string): Promise<ArticleResponseDto> {
+  async updateArticle(id: string, data: any, userId: string, imageFile?: Express.Multer.File): Promise<ArticleResponseDto> {
     const article = await this.articleRepository.getArticleById(id);
     if (!article) throw new Error("Article not found");
     if (article.userId !== userId) throw new Error("Unauthorized");
 
-    const category = await this.categoryRepository.findByName(data.categoryName);
-    if (!category) throw new Error("Category not found");
+    let category = await this.categoryRepository.findByName(data.categoryName);
+    if (!category) {
+      category = await this.categoryRepository.createCategory({ name: data.categoryName });
+    }
+    let imageUrl = article.imageUrl;
+    if (imageFile) {
+      const uploadResult = await this.uploadImage(imageFile);
+      imageUrl = uploadResult;
+    }
 
     const updateData: Partial<IArticle> = {
       title: data.title,
       description: data.description,
       content: data.content,
-      imageUrl: data.imageUrl,
+      imageUrl,
       tags: data.tags,
       categoryId: new Types.ObjectId(category._id as string),
       categoryName: category.name,
+      status: data.status || article.status,
     };
 
     const updatedArticle = await this.articleRepository.updateArticle(id, updateData);

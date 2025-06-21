@@ -9,6 +9,7 @@ import { getCategories } from "@/services/AddArticleService";
 import type { User } from "@/types/user";
 import type React from "react";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface PasswordChangeData {
   currentPassword: string;
@@ -72,7 +73,7 @@ export const Settings: React.FC = () => {
       setAvailableCategories(categories);
     } catch (error) {
       console.error("Failed to load categories:", error);
-      alert("Failed to load categories. Please try again.");
+       toast.error("Failed to load categories. Please try again.");
     } finally {
       setPreferencesLoading(false);
     }
@@ -103,10 +104,10 @@ export const Settings: React.FC = () => {
 
       const imageUrl = await uploadProfileImage(user.userId, file);
       setProfileData((prev) => ({ ...prev, profileImage: imageUrl }));
-      alert("Profile photo updated successfully!");
+       toast.success("Profile photo updated successfully!");
     } catch (error: any) {
       console.error("Failed to update profile photo:", error);
-      alert(error.response?.data?.message || "Failed to update profile photo. Please try again.");
+       toast.error(error.response?.data?.message || "Failed to update profile photo. Please try again.");
     } finally {
       setImageUploadLoading(false);
     }
@@ -124,10 +125,10 @@ export const Settings: React.FC = () => {
 
       await updateProfile(user.userId, updatedProfileData);
       setProfileData((prev) => ({ ...prev, ...updatedProfileData }));
-      alert("Profile updated successfully!");
+       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Failed to update profile:", error);
-      alert(error.response?.data?.message || "Failed to update profile. Please try again.");
+       toast.error(error.response?.data?.message || "Failed to update profile. Please try again.");
     } finally {
       setProfileLoading(false);
     }
@@ -149,10 +150,10 @@ export const Settings: React.FC = () => {
     try {
       await updatePreferences(user.userId, profileData.articlePreferences || []);
       setInitialPreferences(profileData.articlePreferences || []);
-      alert("Preferences updated successfully!");
+       toast.success("Preferences updated successfully!");
     } catch (error: any) {
       console.error("Failed to update preferences:", error);
-      alert(error.response?.data?.message || "Failed to update preferences. Please try again.");
+       toast.error(error.response?.data?.message || "Failed to update preferences. Please try again.");
     } finally {
       setProfileLoading(false);
     }
@@ -164,10 +165,10 @@ export const Settings: React.FC = () => {
     setPasswordLoading(true);
     try {
       await changePassword(user.userId, passwordFormData);
-      alert("Password changed successfully!");
+       toast.success("Password changed successfully!");
     } catch (error: any) {
       console.error("Failed to change password:", error);
-      alert(error.response?.data?.message || "Failed to change password. Please try again.");
+       toast.error(error.response?.data?.message || "Failed to change password. Please try again.");
     } finally {
       setPasswordLoading(false);
     }

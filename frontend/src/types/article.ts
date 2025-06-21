@@ -76,3 +76,36 @@ export interface ArticleResponse {
   createdAt: string
   updatedAt: string
 }
+
+
+export interface EditArticleType {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  imageUrl?: string;
+  tags: string[];
+  category: string;
+  userId: string;
+  status: "draft" | "published";
+}
+
+export interface EditArticleFormData {
+  title: string;
+  description: string;
+  content: string;
+  image: File | null;
+  tags: string[];
+  category: string;
+  newCategory: string;
+  status: "draft" | "published";
+}
+
+export interface EditCategory {
+  id: string;
+  name: string;
+}
+
+export interface EditValidationErrors {
+  [key: string]: string | undefined;
+}

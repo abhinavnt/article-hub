@@ -1,4 +1,4 @@
-import type { Article, ArticleFormData, ArticleStats } from "@/types/article";
+import type { Article,  ArticleStats, EditArticleType } from "@/types/article";
 import axiosInstance from "@/utils/axiosInstance";
 
 export const getAllArticles = async (page: number, pageSize: number): Promise<Article[]> => {
@@ -20,6 +20,8 @@ export const dislikeArticle = async (id: string): Promise<void> => {
 };
 
 export const blockArticle = async (id: string): Promise<void> => {
+  console.log(id,"id from the block article");
+  
   await axiosInstance.put(`/articles/${id}/block`);
 };
 
@@ -33,13 +35,16 @@ export const getUserArticleStats = async (): Promise<ArticleStats> => {
   return response.data;
 };
 
-export const getArticleById = async (id: string): Promise<Article> => {
+export const getArticleById = async (id: string): Promise<EditArticleType> => {
   const response = await axiosInstance.get(`/articles/${id}`);
   return response.data;
 };
 
 export const updateArticle = async (id: string, data: FormData): Promise<void> => {
-  await axiosInstance.put(`/articles/${id}`, data);
+  await axiosInstance.put(`/articles/${id}`, data,{
+      withCredentials: true,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 };
 
 export const deleteArticle = async (id: string): Promise<void> => {
