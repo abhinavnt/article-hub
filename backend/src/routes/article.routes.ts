@@ -18,6 +18,7 @@ router.get("/", authMiddleware([UserRole.USER]), articleController.getAllArticle
 router.get("/preferences", authMiddleware([UserRole.USER]), articleController.getArticlesByPreferences);
 router.put("/:id/like", authMiddleware([UserRole.USER]), articleController.likeArticle);
 router.put("/:id/dislike", authMiddleware([UserRole.USER]), articleController.dislikeArticle);
+router.put("/:id/block", authMiddleware([UserRole.USER]), articleController.blockArticle);
 
 router.get("/my", authMiddleware([UserRole.USER]), articleController.getMyArticles);
 router.get("/my/stats", authMiddleware([UserRole.USER]), articleController.getMyArticleStats);

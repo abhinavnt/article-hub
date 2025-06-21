@@ -141,6 +141,10 @@ export class ArticleService implements IArticleService {
     await this.articleRepository.dislikeArticle(articleId, userId);
   }
 
+  async blockArticle(articleId: string, userId: string): Promise<IArticle|null> {
+     return await this.articleRepository.blockArticle(articleId,userId)
+  }
+
   private mapToFeedDto(article: PopulatedArticle, userId: string): ArticleFeedDto {
     console.log(userId, "userid from maping the dto", article, "article from the dto maping");
 

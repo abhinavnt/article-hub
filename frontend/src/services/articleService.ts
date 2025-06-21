@@ -1,4 +1,4 @@
-import type { Article, ArticleFormData, ArticleStats, EditArticleType } from "@/types/article";
+import type { Article,  ArticleStats, EditArticleType } from "@/types/article";
 import axiosInstance from "@/utils/axiosInstance";
 
 export const getAllArticles = async (page: number, pageSize: number): Promise<Article[]> => {
@@ -20,6 +20,8 @@ export const dislikeArticle = async (id: string): Promise<void> => {
 };
 
 export const blockArticle = async (id: string): Promise<void> => {
+  console.log(id,"id from the block article");
+  
   await axiosInstance.put(`/articles/${id}/block`);
 };
 

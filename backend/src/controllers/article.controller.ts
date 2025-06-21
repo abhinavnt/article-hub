@@ -127,6 +127,19 @@ export class ArticleController implements IArticleController {
     }
   };
 
+  blockArticle = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?._id as string;
+      const articleId = req.params.id;
+      await this.articleService.blockArticle(articleId, userId);
+      res.status(200).json({ message: "Article blocked" });
+    } catch (error: any) {
+      console.log(error);
+
+      res.status(400).json({ message: error.message });
+    }
+  };
+
   getMyArticles = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.user?._id as string;
