@@ -27,7 +27,7 @@ const allowedOrigins = [
   "https://article-hub-git-main-abhinavnt666-gmailcoms-projects.vercel.app",
   "https://article-54qwg32q4-abhinavnt666-gmailcoms-projects.vercel.app"
 ];
-
+ 
 app.use(
   cors({
     origin: function (origin, callback) {
