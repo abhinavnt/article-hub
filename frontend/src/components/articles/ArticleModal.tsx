@@ -21,7 +21,6 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
   onClose,
   onLike,
   onDislike,
-  onBlock,
   showActions = true,
 }) => {
   if (!article) return null
