@@ -22,7 +22,7 @@ export class AuthController implements IAuthController {
       
       const { user, accessToken, refreshToken } = await this.authService.register(registerDto)
 
-      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "strict" });
+      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "none" });
 
       res.status(201).json({ accessToken, user });
     } catch (error: any) {
@@ -36,7 +36,7 @@ export class AuthController implements IAuthController {
 
       const { user, accessToken, refreshToken } = await this.authService.login(loginDto);
 
-      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "strict" });
+      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "none" });
 
       res.status(200).json({ accessToken, user });
     } catch (error: any) {
