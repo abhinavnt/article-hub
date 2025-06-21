@@ -14,6 +14,7 @@ import { getArticleById, updateArticle } from "@/services/articleService"
 import { getCategories, createCategory } from "@/services/AddArticleService"
 import { CategorySelector } from "@/components/create-articles/CategorySelector"
 import type { EditArticleFormData, EditArticleType, EditCategory, EditValidationErrors } from "@/types/article"
+import { toast } from "sonner"
 
 
 export const EditArticle: React.FC = () => {
@@ -57,7 +58,7 @@ export const EditArticle: React.FC = () => {
       ])
 
       if (!articleData) {
-        alert("Article not found")
+        toast.error("Article not found")
         navigate("/my-articles")
         return
       }
@@ -77,7 +78,7 @@ export const EditArticle: React.FC = () => {
       setCategories(availableCategories)
     } catch (error) {
       console.error("Failed to load article:", error)
-      alert("Failed to load article")
+       toast.error("Failed to load article")
       navigate("/my-articles")
     } finally {
       setInitialLoading(false)
@@ -170,11 +171,11 @@ export const EditArticle: React.FC = () => {
       }
 
       await updateArticle(id, formDataToSend)
-      alert(`🎉 Article "${formData.title}" updated successfully!`)
+       toast.error(`🎉 Article "${formData.title}" updated successfully!`)
       navigate("/my-articles")
     } catch (error) {
       console.error("Failed to update article:", error)
-      alert("❌ Failed to update article. Please try again.")
+       toast.error("❌ Failed to update article. Please try again.")
     } finally {
       setLoading(false)
     }

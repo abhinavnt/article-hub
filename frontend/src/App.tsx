@@ -12,6 +12,7 @@ import { MyArticles } from "./pages/MyArticles";
 import { CreateArticle } from "./pages/CreateArticle";
 import { EditArticle } from "./pages/EditArticle";
 import { Settings } from "./pages/Settings";
+import { Toaster } from "sonner";
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
 
   return (
     <>
+    <Toaster position="top-right" theme="dark" />
       <BrowserRouter>
         <Routes>
           <Route path="/register" element={<AuthPage />} />

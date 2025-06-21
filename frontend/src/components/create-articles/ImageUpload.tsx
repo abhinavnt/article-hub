@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from "react"
 import { X, ImageIcon, Camera, Upload } from "lucide-react"
+import { toast } from "sonner"
 
 interface ImageUploadProps {
   onImageSelect: (file: File | null) => void
@@ -49,7 +50,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelect, error, 
     if (file.type.startsWith("image/")) {
       onImageSelect(file)
     } else {
-      alert("Please select an image file")
+      toast.error("Please select an image file")
     }
   }
 

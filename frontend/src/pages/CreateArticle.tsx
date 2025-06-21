@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
 import type { ArticleFormData, Category, ValidationErrors } from "../types/article"
@@ -12,6 +10,7 @@ import { TagInput } from "@/components/create-articles/TagInput"
 import { CreateCategoryModal } from "@/components/create-articles/CreateCategoryModal"
 import { CategorySelector } from "@/components/create-articles/CategorySelector"
 import { createCategory, getCategories, publishArticle, saveDraft } from "@/services/AddArticleService"
+import { toast } from "sonner"
 
 export const CreateArticle: React.FC = () => {
   const [formData, setFormData] = useState<ArticleFormData>({
@@ -122,11 +121,9 @@ export const CreateArticle: React.FC = () => {
 
     setLoading(true)
     try {
-      console.log(formData, "submitting form data")
       const response = await publishArticle(formData)
 
-      alert(`🎉 Article "${response.title}" published successfully!\nArticle ID: ${response.id}`)
-
+      toast.success(`${response.title} published successfully!`)
       setFormData({
         title: "",
         description: "",
@@ -140,7 +137,7 @@ export const CreateArticle: React.FC = () => {
       await loadCategories()
     } catch (error) {
       console.error("Failed to publish article:", error)
-      alert("❌ Failed to publish article. Please try again.")
+      toast.error("Failed to publish article. Please try again")
     } finally {
       setLoading(false)
     }
@@ -148,7 +145,7 @@ export const CreateArticle: React.FC = () => {
 
   const handleSaveDraft = async () => {
     if (!formData.title.trim()) {
-      alert("⚠️ Please add a title before saving as draft")
+      toast.error("⚠️ Please add a title before saving as draft")
       return
     }
 
@@ -156,12 +153,12 @@ export const CreateArticle: React.FC = () => {
     try {
       const response = await saveDraft(formData)
 
-      alert(`📝 Article "${response.title}" saved as draft!\nDraft ID: ${response.id}`)
+      toast.success(`📝 Article "${response.title}" saved as draft!`)
 
       await loadCategories()
     } catch (error) {
       console.error("Failed to save draft:", error)
-      alert("❌ Failed to save draft. Please try again.")
+      toast(" Failed to save draft. Please try again.")
     } finally {
       setSavingDraft(false)
     }

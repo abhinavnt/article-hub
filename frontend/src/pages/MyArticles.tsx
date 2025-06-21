@@ -9,6 +9,7 @@ import { useAppSelector } from "@/redux/store"
 import { Button } from "@/components/ui/CustomButton"
 import { Card } from "@/components/ui/CustomCard"
 import { deleteArticle, getUserArticles, getUserArticleStats } from "@/services/articleService"
+import { toast } from "sonner"
 
 // Confirmation Modal Component
 interface ConfirmationModalProps {
@@ -188,9 +189,10 @@ export const MyArticles: React.FC = () => {
       }
       setShowDeleteConfirm(false)
       setArticleToDelete(null)
+      toast.success("article delete success")
     } catch (error) {
       console.error("Failed to delete article:", error)
-      alert("Failed to delete article. Please try again.")
+       toast.error("Failed to delete article. Please try again.")
     } finally {
       setDeleteLoading(null)
     }
