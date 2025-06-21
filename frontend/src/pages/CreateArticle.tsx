@@ -1,19 +1,19 @@
+"use client"
 
 import type React from "react"
 import { useState, useEffect } from "react"
 import type { ArticleFormData, Category, ValidationErrors } from "../types/article"
-import { Plus, Save, Send } from "lucide-react"
+import { Save, Send } from "lucide-react"
 import { Card } from "@/components/ui/CustomCard"
 import { Input } from "@/components/ui/CustomInput"
 import { ImageUpload } from "@/components/create-articles/ImageUpload"
 import { Button } from "@/components/ui/CustomButton"
 import { TagInput } from "@/components/create-articles/TagInput"
 import { CreateCategoryModal } from "@/components/create-articles/CreateCategoryModal"
+import { CategorySelector } from "@/components/create-articles/CategorySelector"
 import { createCategory, getCategories, publishArticle, saveDraft } from "@/services/AddArticleService"
 
 export const CreateArticle: React.FC = () => {
-
-
   const [formData, setFormData] = useState<ArticleFormData>({
     title: "",
     description: "",
@@ -112,20 +112,20 @@ export const CreateArticle: React.FC = () => {
 
   //api connected
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!validateForm()) {
-      const firstErrorElement = document.querySelector(".text-red-600");
-      firstErrorElement?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
+      const firstErrorElement = document.querySelector(".text-red-600")
+      firstErrorElement?.scrollIntoView({ behavior: "smooth", block: "center" })
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
-      console.log(formData, "submitting form data");
-      const response = await publishArticle(formData);
+      console.log(formData, "submitting form data")
+      const response = await publishArticle(formData)
 
-      alert(`🎉 Article "${response.title}" published successfully!\nArticle ID: ${response.id}`);
+      alert(`🎉 Article "${response.title}" published successfully!\nArticle ID: ${response.id}`)
 
       setFormData({
         title: "",
@@ -135,37 +135,38 @@ export const CreateArticle: React.FC = () => {
         tags: [],
         category: "",
         newCategory: "",
-      });
+      })
 
-      await loadCategories();
+      await loadCategories()
     } catch (error) {
-      console.error("Failed to publish article:", error);
-      alert("❌ Failed to publish article. Please try again.");
+      console.error("Failed to publish article:", error)
+      alert("❌ Failed to publish article. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleSaveDraft = async () => {
     if (!formData.title.trim()) {
-      alert("⚠️ Please add a title before saving as draft");
-      return;
+      alert("⚠️ Please add a title before saving as draft")
+      return
     }
 
-    setSavingDraft(true);
+    setSavingDraft(true)
     try {
-      const response = await saveDraft(formData);
+      const response = await saveDraft(formData)
 
-      alert(`📝 Article "${response.title}" saved as draft!\nDraft ID: ${response.id}`);
+      alert(`📝 Article "${response.title}" saved as draft!\nDraft ID: ${response.id}`)
 
-      await loadCategories();
+      await loadCategories()
     } catch (error) {
-      console.error("Failed to save draft:", error);
-      alert("❌ Failed to save draft. Please try again.");
+      console.error("Failed to save draft:", error)
+      alert("❌ Failed to save draft. Please try again.")
     } finally {
-      setSavingDraft(false);
+      setSavingDraft(false)
     }
-  };
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -193,12 +194,13 @@ export const CreateArticle: React.FC = () => {
                   Description <span className="text-red-500">*</span>
                 </label>
                 <span
-                  className={`text-sm ${formData.description.length > 300
-                    ? "text-red-500"
-                    : formData.description.length > 250
-                      ? "text-yellow-600"
-                      : "text-gray-500"
-                    }`}
+                  className={`text-sm ${
+                    formData.description.length > 300
+                      ? "text-red-500"
+                      : formData.description.length > 250
+                        ? "text-yellow-600"
+                        : "text-gray-500"
+                  }`}
                 >
                   {formData.description.length}/300
                 </span>
@@ -208,10 +210,11 @@ export const CreateArticle: React.FC = () => {
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 placeholder="Provide a brief, engaging description of your article..."
                 rows={4}
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 resize-none ${errors.description
-                  ? "border-red-500 bg-red-50 focus:border-red-600"
-                  : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 resize-none ${
+                  errors.description
+                    ? "border-red-500 bg-red-50 focus:border-red-600"
+                    : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
+                }`}
               />
               {errors.description && <p className="text-sm text-red-600 font-medium">{errors.description}</p>}
             </div>
@@ -223,12 +226,13 @@ export const CreateArticle: React.FC = () => {
                   Article Content <span className="text-red-500">*</span>
                 </label>
                 <span
-                  className={`text-sm ${formData.content.length > 5000
-                    ? "text-red-500"
-                    : formData.content.length > 4500
-                      ? "text-yellow-600"
-                      : "text-gray-500"
-                    }`}
+                  className={`text-sm ${
+                    formData.content.length > 5000
+                      ? "text-red-500"
+                      : formData.content.length > 4500
+                        ? "text-yellow-600"
+                        : "text-gray-500"
+                  }`}
                 >
                   {formData.content.length}/5000
                 </span>
@@ -238,10 +242,11 @@ export const CreateArticle: React.FC = () => {
                 onChange={(e) => handleInputChange("content", e.target.value)}
                 placeholder="Write your article content here. Share your insights, experiences, and knowledge..."
                 rows={16}
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 resize-y ${errors.content
-                  ? "border-red-500 bg-red-50 focus:border-red-600"
-                  : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 resize-y ${
+                  errors.content
+                    ? "border-red-500 bg-red-50 focus:border-red-600"
+                    : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
+                }`}
               />
               {errors.content && <p className="text-sm text-red-600 font-medium">{errors.content}</p>}
             </div>
@@ -253,46 +258,15 @@ export const CreateArticle: React.FC = () => {
               currentImage={formData.image}
             />
 
-            {/* Category Selection */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-900">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCategoryModal(true)}
-                  className="text-black hover:bg-black hover:text-white"
-                >
-                  <Plus size={16} className="mr-1" />
-                  New Category
-                </Button>
-              </div>
-
-              {loadingCategories ? (
-                <div className="animate-pulse bg-gray-200 h-12 rounded-xl"></div>
-              ) : (
-                <select
-                  value={formData.category}
-                  onChange={(e) => handleInputChange("category", e.target.value)}
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-0 transition-all duration-200 ${errors.category
-                    ? "border-red-500 bg-red-50 focus:border-red-600"
-                    : "border-gray-200 focus:border-black bg-white hover:border-gray-300"
-                    }`}
-                >
-                  <option value="">Select a category for your article</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.name}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-
-              {errors.category && <p className="text-sm text-red-600 font-medium">{errors.category}</p>}
-            </div>
+            {/* Category Selection - REPLACED WITH CategorySelector */}
+            <CategorySelector
+              categories={categories}
+              selectedCategory={formData.category}
+              onCategorySelect={(categoryName) => handleInputChange("category", categoryName)}
+              onCreateNew={() => setShowCategoryModal(true)}
+              error={errors.category}
+              loading={loadingCategories}
+            />
 
             {/* Tags */}
             <TagInput

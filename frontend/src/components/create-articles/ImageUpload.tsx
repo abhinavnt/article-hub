@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useRef, useCallback } from "react"
 import { X, ImageIcon, Camera } from "lucide-react"
 
@@ -5,9 +7,10 @@ interface ImageUploadProps {
   onImageSelect: (file: File | null) => void
   error?: string
   currentImage?: File | null
+  existingImageUrl?: string | null
 }
 
-export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelect, error, currentImage }) => {
+export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelect, error, currentImage, existingImageUrl }) => {
   const [dragActive, setDragActive] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -17,10 +20,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelect, error, 
       const url = URL.createObjectURL(currentImage)
       setPreview(url)
       return () => URL.revokeObjectURL(url)
+    } else if (existingImageUrl) {
+      setPreview(existingImageUrl)
     } else {
       setPreview(null)
     }
-  }, [currentImage])
+  }, [currentImage, existingImageUrl])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -83,6 +88,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelect, error, 
               <X size={20} />
             </button>
           </div>
+          {existingImageUrl && !currentImage && (
+            <div className="absolute top-3 left-3">
+              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                Current Image
+              </span>
+            </div>
+          )}
         </div>
       ) : (
         <div
