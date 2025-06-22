@@ -30,7 +30,7 @@ export const authMiddleware = (roles: UserRole[]) => {
       next();
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        res.status(401).json({ error: "Token has expired" });
+        res.status(401).json({ code: 'TOKEN_EXPIRED',error: "Token has expired" });
         return;
       }
       res.status(403).json({ error: "Invalid token" });

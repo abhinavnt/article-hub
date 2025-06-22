@@ -52,11 +52,12 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(error)
         }
 
-
+        console.log("request is goin",error.response.status);
+        
         if( error.response.status===401 && error.response.data.code==='TOKEN_EXPIRED'&&!originalRequest._retry){
             originalRequest._retry=true
             try {
-                const response=await axios.post(apiUrl+'/auth/refresh-token',null,{withCredentials:true})
+                const response=await axios.post(apiUrl+'/api/auth/refresh-token',null,{withCredentials:true})
                 const newToken=response.data.accessToken
                 originalRequest.headers.Authorization=`Bearer ${newToken}`
                 store.dispatch({type:'auth/updateToken',payload:newToken})
